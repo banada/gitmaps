@@ -44,6 +44,7 @@
     "cors": "^2.8.5",
     "css-loader": "^3.5.3",
     "cytoscape-edgehandles": "^4.0.1",
+    "cytoscape-popper": "^2.0.0",
     "dayjs": "^1.9.3",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
