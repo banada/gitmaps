@@ -25,13 +25,12 @@ class Editor extends React.Component {
 
     componentDidMount = () => {
         // Handle is shared by all nodes
-        const div = document.createElement('div');
-        div.id = 'handle';
-        div.className = 'p-2 border-2 border-blue-700 rounded';
-        div.hidden = true;
-        document.body.appendChild(div);
+        const handleDiv = document.createElement('div');
+        handleDiv.id = 'handle';
+        handleDiv.className = 'p-2 border-2 border-blue-700 rounded';
+        handleDiv.hidden = true;
+        document.body.appendChild(handleDiv);
 
-        //cytoscape.use(edgehandles);
         const cy = window.cy = cytoscape({
             container: document.getElementById('cy'),
             elements: testgraph,
@@ -49,8 +48,8 @@ class Editor extends React.Component {
                 }
             ]
         });
-        const eh = cy.edgehandles({
-            snap: true
+        const edgeHandler = cy.edgehandles({
+            snap: false
         });
 
         let selectedNodes = cy.collection();
@@ -62,8 +61,8 @@ class Editor extends React.Component {
         const selectNode = (node) => {
             node.handle = node.popper({
                 content: () => {
-                    div.hidden = false;
-                    return div;
+                    handleDiv.hidden = false;
+                    return handleDiv;
                 }
             });
 
@@ -82,8 +81,9 @@ class Editor extends React.Component {
         // Move node
         cy.on('position', 'node', (evt) => {
             const node = evt.target;
+
             // Update handle position
-            if (node.handle) {
+            if (node.id() === this.state.selectedNodes.first().id()) {
                 node.handle.update();
             }
         });
@@ -96,7 +96,17 @@ class Editor extends React.Component {
             if (node.handle) {
                 node.handle.update();
             }
-        })
+        });
+
+        handleDiv.addEventListener('mousedown', () => {
+            const node = this.state.selectedNodes.first();
+            edgeHandler.start(node);
+        });
+
+        document.addEventListener('mouseup', () => {
+            edgeHandler.stop();
+        });
+
     }
 
     render() {
