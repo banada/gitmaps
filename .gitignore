@@ -1,0 +1,6 @@
+dist/
+node_modules/
+*/**/*bundle.js*
+loadable-stats.json
+.env
+backups/
