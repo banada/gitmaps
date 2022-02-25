@@ -129,6 +129,17 @@ class Editor extends React.Component {
             edgeHandler.stop();
         });
 
+        document.addEventListener('keydown', (evt) => {
+            // Delete a node
+            if (evt.key === 'Delete') {
+                const node = this.state.selectedNodes.first();
+                const id = node.data().id;
+                const selector = `node[id = "${id}"]`;
+                this.state.cytoscape.remove(selector);
+                handleDiv.hidden = true;
+            }
+        });
+
         this.setState({
             cytoscape: cyto,
             edgeHandler
