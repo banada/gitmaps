@@ -39,6 +39,13 @@ class Editor extends React.Component {
                         'text-wrap': 'wrap',
                         'text-max-width': '100px'
                     }
+                },
+                {
+                    selector: 'edge',
+                    css: {
+                        'curve-style': 'bezier',
+                        'target-arrow-shape': 'triangle'
+                    }
                 }
             ]
         });
