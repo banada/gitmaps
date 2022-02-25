@@ -4,9 +4,12 @@ import popper from 'cytoscape-popper';
 import contextMenus from 'cytoscape-context-menus';
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import compoundDragAndDrop from 'cytoscape-compound-drag-and-drop';
+import isEqual from 'lodash.isequal';
 
 import Sidebar from './Sidebar';
 import testgraph from './testgraph.json';
+import left from './left.json'
+import right from './right.json';
 import styles from './cyto.css';
 
 // Handle is shared by all nodes
@@ -48,6 +51,30 @@ class Editor extends React.Component {
                         'text-wrap': 'wrap',
                         'text-max-width': '100px'
                     }
+                },
+                {
+                     selector: 'node.green',
+                     css: {
+                        'background-color': 'green'
+                     }
+                },
+                {
+                     selector: 'edge.green',
+                     css: {
+                        'line-color': 'green'
+                     }
+                },
+                {
+                     selector: 'node.red',
+                     css: {
+                        'background-color': 'red'
+                     }
+                },
+                {
+                     selector: 'edge.red',
+                     css: {
+                        'line-color': 'red'
+                     }
                 },
                 {
                     selector: 'edge',
@@ -245,6 +272,148 @@ class Editor extends React.Component {
         reader.readAsText(file);
     }
 
+    /**
+     *  Diff two graphs
+     *  Separate nodes and edges into three groups:
+     *      equal: exactly identical, no change
+     *      left: old (changed)
+     *      right: new (changed)
+     */
+    viewDiff = () => {
+        const equalNodes = [];
+        const equalEdges = [];
+        let leftNodes = [];
+        let leftEdges = [];
+        let rightNodes = [];
+        let rightEdges  = [];
+
+        // Split left nodes into equal/left
+        left.nodes.forEach((l) => {
+            let matched = false;
+            right.nodes.forEach((r) => {
+                if (r.data.id === l.data.id) {
+                    if (isEqual(r, l)) {
+                        equalNodes.push(l);
+                        matched = true;
+                    }
+                }
+            });
+            if (!matched) {
+                leftNodes.push(l);
+            }
+        });
+
+        // Split right nodes into equal/right
+        right.nodes.forEach((r) => {
+            let matched = false;
+            equalNodes.forEach((m) => {
+                // Match ID
+                if (m.data.id === r.data.id) {
+                    if (isEqual(m, r)) {
+                        matched = true;
+                    }
+                }
+            });
+            if (!matched) {
+                rightNodes.push(r);
+            }
+        });
+
+        left.edges.forEach((l) => {
+            let matched = false;
+            right.edges.forEach((r) => {
+                if (r.data.id === l.data.id) {
+                    if (isEqual(r, l)) {
+                        equalEdges.push(l);
+                        matched = true;
+                    }
+                }
+            });
+            if (!matched) {
+                leftEdges.push(l);
+            }
+        });
+
+        right.edges.forEach((r) => {
+            let matched = false;
+            equalEdges.forEach((m) => {
+                // Match ID
+                if (m.data.id === r.data.id) {
+                    if (isEqual(m, r)) {
+                        matched = true;
+                    }
+                }
+            });
+            if (!matched) {
+                rightEdges.push(r);
+            }
+        });
+
+        // Color tag nodes
+        leftNodes = leftNodes.map((l) => {
+            l.classes += 'red';
+            return l;
+        });
+        rightNodes = rightNodes.map((r) => {
+            r.classes += 'green';
+            return r;
+        });
+        // Color tag edges
+        leftEdges = leftEdges.map((l) => {
+            l.classes += 'red';
+            return l;
+        });
+        rightEdges = rightEdges.map((r) => {
+            r.classes += 'green';
+            return r;
+        });
+
+        const leftGraph = {
+            nodes: [
+                ...equalNodes,
+                ...leftNodes
+            ],
+            edges: [
+                ...equalEdges,
+                ...leftEdges
+            ]
+        }
+        const rightGraph = {
+            nodes: [
+                ...equalNodes,
+                ...rightNodes
+            ],
+            edges: [
+                ...equalEdges,
+                ...rightEdges
+            ]
+        }
+
+        this.setState({
+            leftGraph,
+            rightGraph,
+            currentGraph: 'left'
+        }, () => {
+            this.setup(leftGraph);
+        });
+    }
+
+    toggleDiff = () => {
+        if (this.state.currentGraph === 'left') {
+            this.setState({
+                currentGraph: 'right'
+            });
+
+            this.setup(this.state.rightGraph);
+        } else {
+            this.setState({
+                currentGraph: 'left'
+            });
+
+            this.setup(this.state.leftGraph);
+        }
+    }
+
     render() {
         return (
             <>
@@ -266,6 +435,18 @@ class Editor extends React.Component {
                         onClick={this.importJSON}
                     >
                         Import JSON
+                    </button>
+                    <button
+                        className="border border-blue-700 rounded px-2 py-1 cursor-pointer"
+                        onClick={this.viewDiff}
+                    >
+                        View Diff
+                    </button>
+                    <button
+                        className="border border-blue-700 rounded px-2 py-1 cursor-pointer"
+                        onClick={this.toggleDiff}
+                    >
+                        Toggle Diff
                     </button>
                 </div>
                 <div id="cyto"></div>
