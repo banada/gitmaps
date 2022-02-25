@@ -3,6 +3,8 @@ import edgehandles from 'cytoscape-edgehandles';
 import popper from 'cytoscape-popper';
 import contextMenus from 'cytoscape-context-menus';
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
+
+import Sidebar from './Sidebar';
 import testgraph from './testgraph.json';
 import styles from './cyto.css';
 
@@ -105,6 +107,14 @@ class Editor extends React.Component {
             }
         });
 
+        // Double click node to open sidebar
+        cyto.on('dblclick', 'node', (evt) => {
+            const node = evt.target;
+            this.setState({
+                detailNode: node.id()
+            });
+        });
+
         // Move node
         cyto.on('position', 'node', (evt) => {
             const node = evt.target;
@@ -155,6 +165,16 @@ class Editor extends React.Component {
         });
     }
 
+    editNode = (evt, property) => {
+        const id = this.state.detailNode;
+        const cytoscape = this.state.cytoscape;
+        const node = cytoscape.$(id);
+        node.data(property, evt.target.value);
+        this.setState({
+            cytoscape
+        });
+    }
+
     exportJSON = () => {
         console.log(this.state.cytoscape.json().elements);
     }
@@ -182,6 +202,12 @@ class Editor extends React.Component {
                     </button>
                 </div>
                 <div id="cyto"></div>
+                {(this.state.detailNode) &&
+                    <Sidebar
+                        node={this.state.cytoscape.$(this.state.detailNode).data()}
+                        onEdit={this.editNode}
+                    />
+                }
             </>
         );
     }
