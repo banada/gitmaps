@@ -3,6 +3,7 @@ import loadable from '@loadable/component';
 export const API_PATH = '/api/v1';
 
 const Editor = loadable(() => import('./components/Editor'));
+const PullRequestPage = loadable(() => import('./components/PullRequestPage'));
 const Login = loadable(() => import('./components/Login'));
 const Register = loadable(() => import('./components/Register'));
 const PasswordReset = loadable(() => import('./components/PasswordReset'));
@@ -10,6 +11,7 @@ const Verification = loadable(() => import('./components/Verification'));
 
 export const Paths = {
     Editor: '/edit',
+    PullRequest: '/pr',
     Register: '/register',
     Login: '/login',
     Reset: '/reset',
@@ -18,9 +20,22 @@ export const Paths = {
 
 const routes = [
     {
+        path: '/:user/:repo',
+        component: Editor
+    },
+    {
+        path: '/:user/:repo/pull/:pullNum',
+        component: PullRequestPage
+    },
+    {
         path: Paths.Editor,
         exact: true,
         component: Editor
+    },
+    {
+        path: Paths.PullRequest,
+        exact: true,
+        component: PullRequestPage
     },
     {
         path: Paths.Login,
