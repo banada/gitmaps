@@ -4,7 +4,7 @@
 
     - [x] From within React, use Cytoscape
 
-    - [ ] Needs to support multiple layers
+    - [x] Needs to support multiple layers
 
     - [x] Needs to render text
 
@@ -16,7 +16,9 @@
 
     - [x] Sidebar text editor
 
-    - [ ] Shift-click and drag to select group, then display a button to group items
+    - [x] Shift-click and drag to select group, then display a button to group items
+
+    - [ ] Make it pretty
 
 - [ ] Github Integration
 
@@ -30,6 +32,6 @@
 
 - [ ] Exporting
 
-    - [ ] JSON
+    - [x] JSON
 
     - [ ] DOT (optional)

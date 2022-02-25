@@ -9,6 +9,13 @@ import Sidebar from './Sidebar';
 import testgraph from './testgraph.json';
 import styles from './cyto.css';
 
+// Handle is shared by all nodes
+const handleDiv = document.createElement('div');
+handleDiv.id = 'handle';
+handleDiv.className = 'p-2 border-2 border-blue-700 rounded';
+handleDiv.hidden = true;
+document.body.appendChild(handleDiv);
+
 class Editor extends React.Component {
     constructor(props) {
         super(props);
@@ -17,12 +24,10 @@ class Editor extends React.Component {
     }
 
     componentDidMount = () => {
-        // Handle is shared by all nodes
-        const handleDiv = document.createElement('div');
-        handleDiv.id = 'handle';
-        handleDiv.className = 'p-2 border-2 border-blue-700 rounded';
-        handleDiv.hidden = true;
-        document.body.appendChild(handleDiv);
+        this.setup();
+    }
+
+    setup = (graph) => {
 
         const cyto = window.cy = cytoscape({
             container: document.getElementById('cyto'),
@@ -30,6 +35,7 @@ class Editor extends React.Component {
                 name: 'preset',
                 padding: 5
             },
+            elements: graph,
             style: [
                 {
                     selector: 'node',
@@ -184,11 +190,59 @@ class Editor extends React.Component {
     closeSidebar = () => this.setState({detailNode: null});
 
     exportJSON = () => {
-        console.log(this.state.cytoscape.json().elements);
+        const elements = this.state.cytoscape.json().elements;
+        // Filter out junk
+        const nodes = elements.nodes.map((n) => {
+            return {
+                data: n.data,
+                position: n.position,
+                group: n.group,
+                classes: n.classes
+            }
+        });
+        const edges = elements.edges.map((e) => {
+            return {
+                data: e.data,
+                position: e.position,
+                group: e.group,
+                classes: e.classes
+            }
+        });
+
+        const json = JSON.stringify({nodes, edges});
+        const data = "data:text/json;charset=utf-8," + encodeURIComponent(json);
+        const downloadEl = document.getElementById('download');
+        download.setAttribute('href', data);
+        download.click();
+    }
+
+    handleUpload = (evt) => {
+        const file = evt.target.files[0];
+        if (!file || (file.type !== 'application/json')) {
+            alert('Please upload a JSON file.');
+        }
+
+        this.setState({file});
     }
 
     importJSON = () => {
-        alert('TODO');
+        const file = this.state.file;
+        if (!file || (file.type !== 'application/json')) {
+            alert('Failed to read the file.');
+        }
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const data = evt.target.result;
+            let graph;
+            try {
+                graph = JSON.parse(data);
+                this.setup(graph);
+            } catch (err) {
+                console.log(err);
+                alert('There was a problem parsing the file.');
+            }
+        }
+        reader.readAsText(file);
     }
 
     render() {
@@ -202,6 +256,11 @@ class Editor extends React.Component {
                     >
                         Export JSON
                     </button>
+                    <input
+                        type="file"
+                        accept="application/json"
+                        onChange={this.handleUpload}
+                    ></input>
                     <button
                         className="border border-blue-700 rounded px-2 py-1 cursor-pointer"
                         onClick={this.importJSON}
