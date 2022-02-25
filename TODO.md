@@ -10,11 +10,11 @@
 
     - [x] Create new node on right click
 
-    - [ ] Arrows instead of lines
+    - [x] Arrows instead of lines
 
-    - [ ] Double-click node to open sidebar
+    - [x] Double-click node to open sidebar
 
-    - [ ] Sidebar text editor
+    - [x] Sidebar text editor
 
     - [ ] Shift-click and drag to select group, then display a button to group items
 
