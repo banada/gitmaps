@@ -18,6 +18,10 @@
 
     - [x] Shift-click and drag to select group, then display a button to group items
 
+    - [x] Delete nodes
+
+    - [x] Delete edges
+
     - [ ] Make it pretty
 
 - [ ] Github Integration
@@ -26,9 +30,7 @@
 
     - [ ] Users can fork
 
-    - [ ] Visualize diffs
-
-        - [ ] Can either do side-by-side or inline
+    - [x] Visualize diffs
 
 - [ ] Exporting
 
