@@ -1,9 +1,4 @@
 import React from 'react';
-import edgehandles from 'cytoscape-edgehandles';
-import popper from 'cytoscape-popper';
-import contextMenus from 'cytoscape-context-menus';
-import 'cytoscape-context-menus/cytoscape-context-menus.css';
-import compoundDragAndDrop from 'cytoscape-compound-drag-and-drop';
 import { setupCytoscape } from './cytoscape';
 import {
     graphDiffSeparate,
@@ -11,7 +6,6 @@ import {
 } from './libgitmap';
 
 import Sidebar from './Sidebar';
-import testgraph from './testgraph.json';
 import left from './left.json'
 import right from './right.json';
 import styles from './cyto.css';
