@@ -3,6 +3,7 @@ import edgehandles from 'cytoscape-edgehandles';
 import popper from 'cytoscape-popper';
 import contextMenus from 'cytoscape-context-menus';
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
+import compoundDragAndDrop from 'cytoscape-compound-drag-and-drop';
 
 import Sidebar from './Sidebar';
 import testgraph from './testgraph.json';
@@ -71,6 +72,10 @@ class Editor extends React.Component {
                     }
                 }
             ]
+        });
+
+        const dnd = cyto.compoundDragAndDrop({
+            outThreshold: 50
         });
 
         let selectedNodes = cyto.collection();
@@ -168,12 +173,15 @@ class Editor extends React.Component {
     editNode = (evt, property) => {
         const id = this.state.detailNode;
         const cytoscape = this.state.cytoscape;
-        const node = cytoscape.$(id);
+        const selector = `node[id = "${id}"]`;
+        const node = cytoscape.$(selector);
         node.data(property, evt.target.value);
         this.setState({
             cytoscape
         });
     }
+
+    closeSidebar = () => this.setState({detailNode: null});
 
     exportJSON = () => {
         console.log(this.state.cytoscape.json().elements);
@@ -204,8 +212,9 @@ class Editor extends React.Component {
                 <div id="cyto"></div>
                 {(this.state.detailNode) &&
                     <Sidebar
-                        node={this.state.cytoscape.$(this.state.detailNode).data()}
+                        node={this.state.cytoscape.$(`node[id = "${this.state.detailNode}"]`).data()}
                         onEdit={this.editNode}
+                        onClose={this.closeSidebar}
                     />
                 }
             </>

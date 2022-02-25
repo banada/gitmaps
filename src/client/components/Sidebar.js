@@ -6,7 +6,6 @@ class Sidebar extends React.Component {
     }
 
     render() {
-        console.log(this.props.node);
         return (
             <div className="absolute z-10 h-full w-1/3 right-0 top-0 bg-blue-300 shadow-lg px-6">
                 <div className="mt-4">
@@ -29,6 +28,14 @@ class Sidebar extends React.Component {
                             className="rounded w-full"
                         ></textarea>
                     </div>
+                </div>
+                <div className="mt-4">
+                    <button
+                        onClick={this.props.onClose}
+                        className="rounded px-2 py-1 border border-blue-700"
+                    >
+                        Close
+                    </button>
                 </div>
             </div>
         );
