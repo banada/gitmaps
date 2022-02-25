@@ -31,7 +31,6 @@ class Editor extends React.Component {
     }
 
     setup = (graph) => {
-
         const cyto = window.cy = cytoscape({
             container: document.getElementById('cyto'),
             layout: {
@@ -351,20 +350,28 @@ class Editor extends React.Component {
 
         // Color tag nodes
         leftNodes = leftNodes.map((l) => {
-            l.classes += 'red';
+            if (l.classes.split(' ').indexOf('red') < 0) {
+                l.classes += ' red';
+            }
             return l;
         });
         rightNodes = rightNodes.map((r) => {
-            r.classes += 'green';
+            if (r.classes.split(' ').indexOf('green') < 0) {
+                r.classes += ' green';
+            }
             return r;
         });
         // Color tag edges
         leftEdges = leftEdges.map((l) => {
-            l.classes += 'red';
+            if (l.classes.split(' ').indexOf('red') < 0) {
+                l.classes += ' red';
+            }
             return l;
         });
         rightEdges = rightEdges.map((r) => {
-            r.classes += 'green';
+            if (r.classes.split(' ').indexOf('green') < 0) {
+                r.classes += ' green';
+            }
             return r;
         });
 
@@ -394,7 +401,7 @@ class Editor extends React.Component {
             rightGraph,
             currentGraph: 'left'
         }, () => {
-            this.setup(leftGraph);
+            this.setup(leftGraph, this.state.cytoscape.zoom());
         });
     }
 
@@ -404,13 +411,13 @@ class Editor extends React.Component {
                 currentGraph: 'right'
             });
 
-            this.setup(this.state.rightGraph);
+            this.setup(this.state.rightGraph, this.state.cytoscape.zoom());
         } else {
             this.setState({
                 currentGraph: 'left'
             });
 
-            this.setup(this.state.leftGraph);
+            this.setup(this.state.leftGraph, this.state.cytoscape.zoom());
         }
     }
 
