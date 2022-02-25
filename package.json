@@ -43,6 +43,7 @@
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "css-loader": "^3.5.3",
+    "cytoscape-compound-drag-and-drop": "^1.0.0",
     "cytoscape-context-menus": "^4.1.0",
     "cytoscape-edgehandles": "^4.0.1",
     "cytoscape-popper": "^2.0.0",
