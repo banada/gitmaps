@@ -1,14 +1,14 @@
 - [ ] Chrome extension or github app to render tab that will display the graph (Lawrence)
 
-- [ ] Graph renderer
+- [ ] Graph editor
 
-    - [ ] From within React, use Cytoscape
+    - [x] From within React, use Cytoscape
 
     - [ ] Needs to support multiple layers
 
-    - [ ] Needs to render text
+    - [x] Needs to render text
 
-    - [ ] Create new node on right click
+    - [x] Create new node on right click
 
     - [ ] Arrows instead of lines
 
@@ -16,7 +16,7 @@
 
     - [ ] Sidebar text editor
 
-- [ ] Click and drag to select group, then display a button to group items
+    - [ ] Shift-click and drag to select group, then display a button to group items
 
 - [ ] Github Integration
 
