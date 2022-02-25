@@ -1,20 +1,10 @@
 import React from 'react';
 import edgehandles from 'cytoscape-edgehandles';
 import popper from 'cytoscape-popper';
+import contextMenus from 'cytoscape-context-menus';
+import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import testgraph from './testgraph.json';
-import styles from './cy.css';
-
-//EDITOR
-
-// TODO import popper
-// TODO on select, display handle using popper
-// TODO on handle drag, draw edge
-//
-// TODO export new JSON
-// TODO create new node on right click
-// TODO double-click node to edit text
-// TODO click and drag to select, then display a button to group items
-// TODO how should we show text entry? Double click to open sidebar?
+import styles from './cyto.css';
 
 class Editor extends React.Component {
     constructor(props) {
@@ -31,9 +21,8 @@ class Editor extends React.Component {
         handleDiv.hidden = true;
         document.body.appendChild(handleDiv);
 
-        const cy = window.cy = cytoscape({
-            container: document.getElementById('cy'),
-            elements: testgraph,
+        const cyto = window.cy = cytoscape({
+            container: document.getElementById('cyto'),
             layout: {
                 name: 'preset',
                 padding: 5
@@ -42,17 +31,40 @@ class Editor extends React.Component {
                 {
                     selector: 'node',
                     css: {
-                        'content': 'data(id)',
-                        'text-valign': 'center'
+                        'content': 'data(name)',
+                        'text-valign': 'center',
+                        'font-size': '10px',
+                        'shape': 'round-rectangle',
+                        'width': '100px',
+                        'text-wrap': 'wrap',
+                        'text-max-width': '100px'
                     }
                 }
             ]
         });
-        const edgeHandler = cy.edgehandles({
+
+        // Set up edge handler
+        const edgeHandler = cyto.edgehandles({
             snap: false
         });
 
-        let selectedNodes = cy.collection();
+        // Set up context menu
+        const ctxMenu = cyto.contextMenus({
+            menuItems: [
+                {
+                    id: 'newnode',
+                    content: 'Add node',
+                    tooltipText: 'Create a new node',
+                    selector: '',
+                    coreAsWell: true,
+                    onClickFunction: (evt) => {
+                        this.createNode(evt.position);
+                    }
+                }
+            ]
+        });
+
+        let selectedNodes = cyto.collection();
         this.setState({
             selectedNodes
         });
@@ -69,17 +81,25 @@ class Editor extends React.Component {
             // Add to empty collection so that we
             // only select one node at a time
             this.setState({
-                selectedNodes: cy.collection().union(node)
+                selectedNodes: cyto.collection().union(node)
             });
         }
 
-        cy.on('click', 'node', (evt) => {
+        // Click node to select
+        cyto.on('click', 'node', (evt) => {
             const node = evt.target;
             selectNode(node);
         });
 
+        // Click background to deselect
+        cyto.on('click', (evt) => {
+            if (evt.target === cyto) {
+                handleDiv.hidden = true;
+            }
+        });
+
         // Move node
-        cy.on('position', 'node', (evt) => {
+        cyto.on('position', 'node', (evt) => {
             const node = evt.target;
 
             // Update handle position
@@ -89,7 +109,7 @@ class Editor extends React.Component {
         });
 
         // Update handle when grid moves
-        cy.on('pan zoom resize', () => {
+        cyto.on('pan zoom resize', () => {
             // Get selected node
             const node = this.state.selectedNodes.first();
             // Update handle position
@@ -98,22 +118,63 @@ class Editor extends React.Component {
             }
         });
 
+        // Start drawing edge
         handleDiv.addEventListener('mousedown', () => {
             const node = this.state.selectedNodes.first();
             edgeHandler.start(node);
         });
 
+        // Stop drawing edge
         document.addEventListener('mouseup', () => {
             edgeHandler.stop();
         });
 
+        this.setState({
+            cytoscape: cyto,
+            edgeHandler
+        });
+    }
+
+    createNode = (position) => {
+        this.state.cytoscape.add({
+            group: 'nodes',
+            data: {
+                name: 'New node'
+            },
+            position: {
+                x: position.x,
+                y: position.y
+            }
+        });
+    }
+
+    exportJSON = () => {
+        console.log(this.state.cytoscape.json().elements);
+    }
+
+    importJSON = () => {
+        alert('TODO');
     }
 
     render() {
         return (
             <>
                 <h1>GitMaps</h1>
-                <div id="cy"></div>
+                <div className="absolute z-10">
+                    <button
+                        className="border border-blue-700 rounded px-2 py-1 cursor-pointer"
+                        onClick={this.exportJSON}
+                    >
+                        Export JSON
+                    </button>
+                    <button
+                        className="border border-blue-700 rounded px-2 py-1 cursor-pointer"
+                        onClick={this.importJSON}
+                    >
+                        Import JSON
+                    </button>
+                </div>
+                <div id="cyto"></div>
             </>
         );
     }
