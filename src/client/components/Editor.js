@@ -5,6 +5,7 @@ import contextMenus from 'cytoscape-context-menus';
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import compoundDragAndDrop from 'cytoscape-compound-drag-and-drop';
 import isEqual from 'lodash.isequal';
+import { setupCytoscape } from './cytoscape';
 
 import Sidebar from './Sidebar';
 import testgraph from './testgraph.json';
@@ -31,59 +32,7 @@ class Editor extends React.Component {
     }
 
     setup = (graph) => {
-        const cyto = window.cy = cytoscape({
-            container: document.getElementById('cyto'),
-            layout: {
-                name: 'preset',
-                padding: 5
-            },
-            elements: graph,
-            style: [
-                {
-                    selector: 'node',
-                    css: {
-                        'content': 'data(name)',
-                        'text-valign': 'center',
-                        'font-size': '10px',
-                        'shape': 'round-rectangle',
-                        'width': '100px',
-                        'text-wrap': 'wrap',
-                        'text-max-width': '100px'
-                    }
-                },
-                {
-                     selector: 'node.green',
-                     css: {
-                        'background-color': 'green'
-                     }
-                },
-                {
-                     selector: 'edge.green',
-                     css: {
-                        'line-color': 'green'
-                     }
-                },
-                {
-                     selector: 'node.red',
-                     css: {
-                        'background-color': 'red'
-                     }
-                },
-                {
-                     selector: 'edge.red',
-                     css: {
-                        'line-color': 'red'
-                     }
-                },
-                {
-                    selector: 'edge',
-                    css: {
-                        'curve-style': 'bezier',
-                        'target-arrow-shape': 'triangle'
-                    }
-                }
-            ]
-        });
+        const cyto = setupCytoscape(graph);
 
         // Set up edge handler
         const edgeHandler = cyto.edgehandles({
