@@ -4,4 +4,11 @@
     position: absolute;
     left: 0;
     top: 0;
+    background: linear-gradient(#17374a, #112a38 10%);
 }
+
+#handle {
+    border-color: #85d1ff;
+    background-color: #85d1ff;
+}
+
