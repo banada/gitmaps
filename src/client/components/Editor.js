@@ -85,7 +85,7 @@ class Editor extends React.Component {
             this.closeSidebar();
         });
 
-        // Click node to select
+        // Click edge to select
         cyto.on('click', 'edge', (evt) => {
             const edge = evt.target;
             this.closeSidebar();
