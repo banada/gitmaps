@@ -4,6 +4,7 @@ import express from 'express';
 import bodyparser from 'body-parser';
 import path from 'path';
 import cors from 'cors';
+import cookieSession from 'cookie-session';
 
 import v1 from './api/v1/v1';
 
@@ -24,6 +25,12 @@ const corsOptions = {
 httpApp.use(cors(corsOptions));
 // CORS Preflight
 httpApp.options('/*', cors(corsOptions));
+
+// Cookie session
+httpApp.use(cookieSession({
+    name: 'session',
+    keys: [ process.env.COOKIE_KEY ]
+}));
 
 httpApp.use((req, res, next) => {
     bodyparser.json({limit: '10mb'})(req, res, next);
