@@ -66,6 +66,12 @@ class PullRequestPage extends React.Component {
                     files.push(`https://raw.githubusercontent.com/${prData.head.user.login}/${repo}/${prData.head.sha}/${fileData[i].filename}`);
 
                     await this.fetchFiles(files);
+                    this.setState({
+                        branches: {
+                            left: prData.base.label,
+                            right: prData.head.label
+                        }
+                    })
                 }
             }
             if (!foundMatch) {
@@ -101,6 +107,11 @@ class PullRequestPage extends React.Component {
             this.setState({
                 detailNode: node.id()
             });
+        });
+
+        // Click background to deselect
+        cyto.on('click', (evt) => {
+            this.closeSidebar();
         });
 
         this.setState({
@@ -154,19 +165,36 @@ class PullRequestPage extends React.Component {
     render() {
         return (
             <>
-                <div className="absolute z-10">
-                    <button
-                        className="border border-blue-700 rounded px-2 py-1 cursor-pointer"
-                        onClick={evt => alert('TODO')}
-                    >
-                        Edit
-                    </button>
-                    <button
-                        className="border border-blue-700 rounded px-2 py-1 cursor-pointer"
-                        onClick={this.toggleDiff}
-                    >
-                        Toggle Diff
-                    </button>
+                <div className="absolute z-10 flex justify-between w-full -mt-6">
+                    <div className="p-2 text-white font-bold text-2xl">
+                        GitMaps.com
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <div className="p-2">
+                            <button
+                                className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                onClick={evt => alert('TODO')}
+                            >
+                                Edit Graph
+                            </button>
+                        </div>
+                        <div className="p-2">
+                            <button
+                                className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                onClick={this.toggleDiff}
+                            >
+                                Toggle Diff
+                            </button>
+                        </div>
+                    </div>
+                    <div className="w-16"></div>
+                </div>
+                <div className="absolute z-10 flex justify-between w-full bottom-0">
+                    {(this.state.branches) &&
+                        <div className="p-2 text-white text-2xl">
+                            {this.state.branches[this.state.currentGraph]}
+                        </div>
+                    }
                 </div>
                 <div id="cyto"></div>
                 {(this.state.detailNode) &&
