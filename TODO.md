@@ -1,6 +1,4 @@
-- [ ] Chrome extension or github app to render tab that will display the graph (Lawrence)
-
-- [ ] Graph editor
+- [x] Graph editor
 
     - [x] From within React, use Cytoscape
 
@@ -22,9 +20,11 @@
 
     - [x] Delete edges
 
-    - [ ] Make it pretty
+    - [x] Make it pretty
 
 - [ ] Github Integration
+
+    - [ ] GitHub authentication (Lawrence)
 
     - [ ] Users that are part of the project can make changes
 
@@ -44,7 +44,7 @@
 
     - [x] Check if PR involves two gitmap.json files
 
-    - [ ] Display branch name
+    - [x] Display branch name
 
-    - [ ] Add tips
+- [ ] Add instructions / tips (Tippy library?)
 
