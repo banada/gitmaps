@@ -1,3 +1,4 @@
+import '@babel/polyfill';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import edgehandles from 'cytoscape-edgehandles';
@@ -6,6 +7,8 @@ import contextMenus from 'cytoscape-context-menus';
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import compoundDragAndDrop from 'cytoscape-compound-drag-and-drop';
 import isEqual from 'lodash.isequal';
+
+import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
 
 import Sidebar from './Sidebar';
@@ -27,11 +30,16 @@ class Editor extends React.Component {
 
     componentDidMount = () => {
         this.setup();
+
+        const queryParams = this.props.location?.search;
+        if (queryParams) {
+            // TODO Hack, parse properly
+            const code = queryParams.split('?code=')[1];
+            this.getAccessToken(code);
+        }
     }
 
     setup = (graph) => {
-        this.getUser();
-
         const cyto = setupCytoscape(graph);
 
         // Set up edge handler
@@ -165,6 +173,16 @@ class Editor extends React.Component {
         });
     }
 
+    loginWithGithub = () => {
+        window.location = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${window.location}`
+    }
+
+    getAccessToken = async (code) => {
+        // TODO
+        const res = await fetchData('GET', `auth/signin-github?code=${code}`);
+        console.log(res);
+    }
+
     getUser = () => {
         const { search } = useLocation();
         console.log(search);
@@ -229,7 +247,7 @@ class Editor extends React.Component {
         const data = "data:text/json;charset=utf-8," + encodeURIComponent(json);
         const downloadEl = document.getElementById('download');
         download.setAttribute('href', data);
-        download.click();
+        //download.click();
     }
 
     handleUpload = (evt) => {
@@ -282,6 +300,15 @@ class Editor extends React.Component {
                             onClick={this.exportJSON}
                         >
                             Export JSON
+                        </button>
+                    </div>
+                    <div className="p-2">
+                        <button
+                            className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                            style={{ borderColor: '#85d1ff' }}
+                            onClick={this.loginWithGithub}
+                        >
+                            Log in with GitHub
                         </button>
                     </div>
                     {/*

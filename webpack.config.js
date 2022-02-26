@@ -3,6 +3,8 @@ const webpack = require('webpack');
 const webpackNodeExternals = require('webpack-node-externals');
 // Code splitting
 const LoadablePlugin = require('@loadable/webpack-plugin');
+// Environment variables
+const Dotenv = require('dotenv-webpack');
 
 /*
  *  Client
@@ -42,7 +44,8 @@ const clientBundle = {
         new LoadablePlugin(),
         new webpack.DefinePlugin({
             __isBrowser__: 'true'
-        })
+        }),
+        new Dotenv()
     ]
 }
 

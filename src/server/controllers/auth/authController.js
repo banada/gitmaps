@@ -1,22 +1,35 @@
+import axios from 'axios';
+
 //import authService from '../../services/auth/authService';
 //import { Registration, Login, ResetPassword } from '@types/Auth';
 //import { isUn, emailRegex } from '@utils/utils';
 
 const authController = {};
 
-authController.githubSignin = (req, res, next) => {
-    const requestToken = req.query.code;
-    axios({
-        method: 'post',
-        url: `https://github.com/login/oauth/access_token?client_id=${clientID}&client_secret=${clientSecret}&code=${requestToken}`,
-        headers: {
-            accept: 'application/json'
-        }
-    }).then((response) => {
-        const accessToken = response.data.access_token;
-        console.log(response.data);
-        return res.redirect(`/edit?access_token=${accessToken}`);
-    });
+authController.githubSignin = async (req, res, next) => {
+    try {
+        const requestToken = req.query.code;
+        const url = `https://github.com/login/oauth/access_token?client_id=${process.env.clientID}&client_secret=${process.env.clientSecret}&code=${requestToken}`;
+        console.log(url);
+        /*
+        const result = await axios.post(url, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log(result);
+        */
+        /*
+        .then((response) => {
+            const accessToken = response.data.access_token;
+            console.log(response.data);
+            //return res.redirect(`/edit?access_token=${accessToken}`);
+        });
+        */
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
 }
 
 // authController.register = async (req, res, next) => {
