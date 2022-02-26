@@ -30,7 +30,7 @@ class Editor extends React.Component {
     }
 
     setup = (graph) => {
-        getUser();
+        this.getUser();
 
         const cyto = setupCytoscape(graph);
 
@@ -166,13 +166,16 @@ class Editor extends React.Component {
     }
 
     getUser = () => {
-        const { search } = useLocation;
-        query = React.useMemo(() => new URLSearchParams(search, [search]));
+        const { search } = useLocation();
+        console.log(search);
+        const query = new URLSearchParams(search, [search]);
+        console.log(query);
         if (query.has('access_token')) {
             const accessToken = query.has('access_token');
+            console.log(accessToken);
             fetch('https://api.github.com/user', { headers: { Authorization: `token ${accessToken}` } })
                 .then(res = res.json())
-                .then(res => this.setState({name: ${res.name}});
+                .then(res => this.setState({name: `${res.name}`}));
         }
     }
 
@@ -263,12 +266,14 @@ class Editor extends React.Component {
     render() {
         return (
             <>
-                <div className="absolute z-10 flex justify-between w-full -mt-6">
+                <div className="absolute z-10 flex justify-between w-full">
                     <div className="p-2 text-white font-bold text-2xl">
                         GitMaps.com
                     </div>
                     <div>
-                        { this.state.name ? ( <h3>Hello {this.state.name} </h3> ) }
+                        {(this.state.name) &&
+                            <h3>Hello {this.state.name} </h3>
+                        }
                     </div>
                     <div className="p-2">
                         <button
