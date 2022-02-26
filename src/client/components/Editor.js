@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import edgehandles from 'cytoscape-edgehandles';
 import popper from 'cytoscape-popper';
 import contextMenus from 'cytoscape-context-menus';
@@ -29,6 +30,8 @@ class Editor extends React.Component {
     }
 
     setup = (graph) => {
+        getUser();
+
         const cyto = setupCytoscape(graph);
 
         // Set up edge handler
@@ -162,6 +165,17 @@ class Editor extends React.Component {
         });
     }
 
+    getUser = () => {
+        const { search } = useLocation;
+        query = React.useMemo(() => new URLSearchParams(search, [search]));
+        if (query.has('access_token')) {
+            const accessToken = query.has('access_token');
+            fetch('https://api.github.com/user', { headers: { Authorization: `token ${accessToken}` } })
+                .then(res = res.json())
+                .then(res => this.setState({name: ${res.name}});
+        }
+    }
+
     createNode = (position) => {
         this.state.cytoscape.add({
             group: 'nodes',
@@ -244,12 +258,17 @@ class Editor extends React.Component {
         reader.readAsText(file);
     }
 
+    
+
     render() {
         return (
             <>
                 <div className="absolute z-10 flex justify-between w-full -mt-6">
                     <div className="p-2 text-white font-bold text-2xl">
                         GitMaps.com
+                    </div>
+                    <div>
+                        { this.state.name ? ( <h3>Hello {this.state.name} </h3> ) }
                     </div>
                     <div className="p-2">
                         <button
