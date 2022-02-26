@@ -1,7 +1,19 @@
 import express from 'express';
 import authController from '../../../controllers/auth/authController';
 
+const axios = require('axios');
 const auth = express.Router();
+
+const clientID = process.env.GITHUB_CLIENT_ID;
+const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+
+auth.get('/signin-github', (req, res, next) => {
+    try {
+        return authController.githubSignin(req, res, next);
+    } catch (err) {
+        throw err;
+    }
+});
 
 auth.post('/register', async (req, res, next) => {
     try {
