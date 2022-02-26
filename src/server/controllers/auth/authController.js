@@ -1,31 +1,32 @@
 import axios from 'axios';
+import cookieSession from 'cookie-session';
 
 //import authService from '../../services/auth/authService';
 //import { Registration, Login, ResetPassword } from '@types/Auth';
 //import { isUn, emailRegex } from '@utils/utils';
+const GITHUB_OAUTH_URL = 'https://github.com/login/oauth';
 
 const authController = {};
 
 authController.githubSignin = async (req, res, next) => {
     try {
-        const requestToken = req.query.code;
-        const url = `https://github.com/login/oauth/access_token?client_id=${process.env.clientID}&client_secret=${process.env.clientSecret}&code=${requestToken}`;
-        console.log(url);
-        /*
+        const code = req.query.code;
+        const url = `${GITHUB_OAUTH_URL}/access_token`;
         const result = await axios.post(url, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            client_id: process.env.GITHUB_CLIENT_ID,
+            client_secret: process.env.GITHUB_CLIENT_SECRET,
+            code
         });
-        console.log(result);
-        */
-        /*
-        .then((response) => {
-            const accessToken = response.data.access_token;
-            console.log(response.data);
-            //return res.redirect(`/edit?access_token=${accessToken}`);
-        });
-        */
+        const accessToken = result.data;
+        if (!accessToken) {
+            return res.sendStatus(500);
+        }
+
+        if (!req.session?.ghapi) {
+            req.session.ghapi = accessToken;
+        }
+
+        return res.sendStatus(200);
     } catch (err) {
         console.log(err);
         return res.sendStatus(500);
