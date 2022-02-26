@@ -12,42 +12,65 @@ export function setupCytoscape(graph) {
                 css: {
                     'content': 'data(name)',
                     'text-valign': 'center',
-                    'font-size': '10px',
-                    'shape': 'round-rectangle',
-                    'width': '100px',
+                    'font-size': '14px',
+                    'shape': 'cut-rectangle',
+                    'width': '120px',
+                    'height': '60px',
                     'text-wrap': 'wrap',
-                    'text-max-width': '100px'
+                    'text-max-width': '100px',
+                    'background-color': '#112a38',
+                    'border-width': '1px',
+                    'color': '#cfedff',
+                    'line-color': '#85d1ff',
+                    'border-color': '#85d1ff'
+                }
+            },
+            {
+                selector: 'node:selected',
+                css: {
+                    'background-color': '#85d1ff',
+                    'color': 'black'
+                }
+            },
+            {
+                selector: 'edge:selected',
+                css: {
+                    'width': '6px'
                 }
             },
             {
                  selector: 'node.green',
                  css: {
-                    'background-color': 'green'
+                    'background-color': '#66ff6c',
+                    'color': 'black'
                  }
             },
             {
                  selector: 'edge.green',
                  css: {
-                    'line-color': 'green'
+                    'line-color': '#66ff6c'
                  }
             },
             {
                  selector: 'node.red',
                  css: {
-                    'background-color': 'red'
+                    'background-color': '#ff8066',
+                    'color': 'black'
                  }
             },
             {
                  selector: 'edge.red',
                  css: {
-                    'line-color': 'red'
+                    'line-color': '#ff8066'
                  }
             },
             {
                 selector: 'edge',
                 css: {
+                    'line-color': '#85d1ff',
                     'curve-style': 'bezier',
-                    'target-arrow-shape': 'triangle'
+                    'target-arrow-shape': 'triangle',
+                    'target-arrow-color': '#85d1ff'
                 }
             }
         ]

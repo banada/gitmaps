@@ -39,7 +39,12 @@
     - [ ] DOT (optional)
 
 - [ ] Pull Request Page
-    - [ ] Get pull request data
 
-    - [ ] Check if PR involves two gitmap.json files
+    - [x] Get pull request data
+
+    - [x] Check if PR involves two gitmap.json files
+
+    - [ ] Display branch name
+
+    - [ ] Add tips
 

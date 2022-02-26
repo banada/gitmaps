@@ -13,7 +13,7 @@ import styles from './cyto.css';
 // Handle is shared by all nodes
 const handleDiv = document.createElement('div');
 handleDiv.id = 'handle';
-handleDiv.className = 'p-2 border-2 border-blue-700 rounded';
+handleDiv.className = 'p-2 border rounded';
 handleDiv.hidden = true;
 document.body.appendChild(handleDiv);
 
@@ -56,9 +56,9 @@ class Editor extends React.Component {
             outThreshold: 50
         });
 
-        let selectedNodes = cyto.collection();
+        let selected = cyto.collection();
         this.setState({
-            selectedNodes
+            selected
         });
 
         // Select node
@@ -73,7 +73,8 @@ class Editor extends React.Component {
             // Add to empty collection so that we
             // only select one node at a time
             this.setState({
-                selectedNodes: cyto.collection().union(node)
+                selected: cyto.collection().union(node),
+                selectedType: 'node'
             });
         }
 
@@ -81,12 +82,27 @@ class Editor extends React.Component {
         cyto.on('click', 'node', (evt) => {
             const node = evt.target;
             selectNode(node);
+            this.closeSidebar();
+        });
+
+        // Click node to select
+        cyto.on('click', 'edge', (evt) => {
+            const edge = evt.target;
+            this.closeSidebar();
+            handleDiv.hidden = true;
+            // Add to empty collection so that we
+            // only select one edge at a time
+            this.setState({
+                selected: cyto.collection().union(edge),
+                selectedType: 'edge'
+            });
         });
 
         // Click background to deselect
         cyto.on('click', (evt) => {
             if (evt.target === cyto) {
                 handleDiv.hidden = true;
+                this.closeSidebar();
             }
         });
 
@@ -103,7 +119,7 @@ class Editor extends React.Component {
             const node = evt.target;
 
             // Update handle position
-            if (node.id() === this.state.selectedNodes.first().id()) {
+            if (node.id() === this.state.selected.first().id()) {
                 node.handle.update();
             }
         });
@@ -111,7 +127,7 @@ class Editor extends React.Component {
         // Update handle when grid moves
         cyto.on('pan zoom resize', () => {
             // Get selected node
-            const node = this.state.selectedNodes.first();
+            const node = this.state.selected.first();
             // Update handle position
             if (node.handle) {
                 node.handle.update();
@@ -120,7 +136,7 @@ class Editor extends React.Component {
 
         // Start drawing edge
         handleDiv.addEventListener('mousedown', () => {
-            const node = this.state.selectedNodes.first();
+            const node = this.state.selected.first();
             edgeHandler.start(node);
         });
 
@@ -132,9 +148,9 @@ class Editor extends React.Component {
         document.addEventListener('keydown', (evt) => {
             // Delete a node
             if (evt.key === 'Delete') {
-                const node = this.state.selectedNodes.first();
+                const node = this.state.selected.first();
                 const id = node.data().id;
-                const selector = `node[id = "${id}"]`;
+                const selector = `${this.state.selectedType}[id = "${id}"]`;
                 this.state.cytoscape.remove(selector);
                 handleDiv.hidden = true;
             }
@@ -231,14 +247,17 @@ class Editor extends React.Component {
     render() {
         return (
             <>
-                <h1>GitMaps</h1>
                 <div className="absolute z-10">
-                    <button
-                        className="border border-blue-700 rounded px-2 py-1 cursor-pointer"
-                        onClick={this.exportJSON}
-                    >
-                        Export JSON
-                    </button>
+                    <div className="p-2">
+                        <button
+                            className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                            style={{ borderColor: '#85d1ff' }}
+                            onClick={this.exportJSON}
+                        >
+                            Export JSON
+                        </button>
+                    </div>
+                    {/*
                     <input
                         type="file"
                         accept="application/json"
@@ -250,6 +269,7 @@ class Editor extends React.Component {
                     >
                         Import JSON
                     </button>
+                    */}
                 </div>
                 <div id="cyto"></div>
                 {(this.state.detailNode) &&
