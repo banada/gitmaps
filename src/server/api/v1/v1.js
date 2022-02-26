@@ -7,11 +7,14 @@ import access from '@api/v1/access/access'
 */
 import auth from '@api/v1/auth/auth';
 import files from '@api/v1/files/files';
+import git from '@api/v1/git/git';
 
 const v1 = express.Router();
 
 v1.use('/files', files);
 v1.use('/auth', auth);
+v1.use('/git', git);
+
 /*
 // Upload images and other assets
 v1.use('/upload',
