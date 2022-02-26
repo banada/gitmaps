@@ -71,7 +71,12 @@ class PullRequestPage extends React.Component {
                             left: prData.base.label,
                             right: prData.head.label
                         }
-                    })
+                    });
+
+                    // Found the first graph
+                    // TODO figure out how to handle
+                    // PRs with multiple graphs
+                    break;
                 }
             }
             if (!foundMatch) {
