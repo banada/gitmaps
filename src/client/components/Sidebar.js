@@ -27,14 +27,16 @@ class Sidebar extends React.Component {
             <div className="absolute z-10 h-full w-1/3 right-0 top-0 bg-blue-300 shadow-lg px-6">
                 {(this.state.mode === SidebarMode.View) &&
                     <>
-                        <div className="mt-4">
-                            <button
-                                onClick={this.editMode}
-                                className="rounded px-2 py-1 border border-blue-700"
-                            >
-                                Edit
-                            </button>
-                        </div>
+                        {(!this.props.noEditing) &&
+                            <div className="mt-4">
+                                <button
+                                    onClick={this.editMode}
+                                    className="rounded px-2 py-1 border border-blue-700"
+                                >
+                                    Edit
+                                </button>
+                            </div>
+                        }
                         <div className="mt-4">
                             <span className="">Title:</span>
                             <div className="flex justify-center items-center mt-4">
