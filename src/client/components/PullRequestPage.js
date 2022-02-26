@@ -171,6 +171,7 @@ class PullRequestPage extends React.Component {
                 <div id="cyto"></div>
                 {(this.state.detailNode) &&
                     <Sidebar
+                        noEditing
                         node={this.state.cytoscape.$(`node[id = "${this.state.detailNode}"]`).data()}
                         onClose={this.closeSidebar}
                     />
