@@ -26,6 +26,15 @@ export function setupCytoscape(graph) {
                 }
             },
             {
+                selector: 'edge',
+                css: {
+                    'line-color': '#85d1ff',
+                    'curve-style': 'bezier',
+                    'target-arrow-shape': 'triangle',
+                    'target-arrow-color': '#85d1ff'
+                }
+            },
+            {
                 selector: 'node:selected',
                 css: {
                     'background-color': '#85d1ff',
@@ -48,7 +57,8 @@ export function setupCytoscape(graph) {
             {
                  selector: 'edge.green',
                  css: {
-                    'line-color': '#66ff6c'
+                    'line-color': '#66ff6c',
+                    'target-arrow-color': '#66ff6c'
                  }
             },
             {
@@ -61,17 +71,9 @@ export function setupCytoscape(graph) {
             {
                  selector: 'edge.red',
                  css: {
-                    'line-color': '#ff8066'
+                    'line-color': '#ff8066',
+                    'target-arrow-color': '#ff8066'
                  }
-            },
-            {
-                selector: 'edge',
-                css: {
-                    'line-color': '#85d1ff',
-                    'curve-style': 'bezier',
-                    'target-arrow-shape': 'triangle',
-                    'target-arrow-color': '#85d1ff'
-                }
             }
         ]
     });
