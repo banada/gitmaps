@@ -20,12 +20,12 @@ export const Paths = {
 
 const routes = [
     {
-        path: '/:user/:repo',
-        component: Editor
-    },
-    {
         path: '/:user/:repo/pull/:pullNum',
         component: PullRequestPage
+    },
+    {
+        path: '/:user/:repo',
+        component: Editor
     },
     {
         path: Paths.Editor,

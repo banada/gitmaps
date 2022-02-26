@@ -37,3 +37,9 @@
     - [x] JSON
 
     - [ ] DOT (optional)
+
+- [ ] Pull Request Page
+    - [ ] Get pull request data
+
+    - [ ] Check if PR involves two gitmap.json files
+

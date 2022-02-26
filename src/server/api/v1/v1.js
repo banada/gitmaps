@@ -7,7 +7,11 @@ import auth from '@api/v1/auth/auth';
 import access from '@api/v1/access/access'
 */
 
+import files from '@api/v1/files/files';
+
 const v1 = express.Router();
+
+v1.use('/files', files);
 
 /*
 // Upload images and other assets
