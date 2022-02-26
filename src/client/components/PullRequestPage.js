@@ -1,14 +1,17 @@
 import React from 'react';
+import '@babel/polyfill';
+
+import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
 import {
     graphDiffSeparate,
     graphDiffCombined
 } from './libgitmap';
-
 import Sidebar from './Sidebar';
-import left from './left.json'
-import right from './right.json';
 import styles from './cyto.css';
+
+const GITHUB_API = 'https://api.github.com';
+const GITMAP_EXT = '.json';
 
 // Handle is shared by all nodes
 const handleDiv = document.createElement('div');
@@ -24,8 +27,67 @@ class PullRequestPage extends React.Component {
         this.state = {}
     }
 
-    componentDidMount = () => {
-        this.setup();
+    componentDidMount = async () => {
+        try {
+            await this.fetchPullRequestFiles();
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    fetchPullRequestFiles = async () => {
+        try {
+            const user = this.props.match.params.user;
+            const repo = this.props.match.params.repo;
+            const pullNum = this.props.match.params.pullNum;
+            // Pull Request Data
+            const prRoute = `/repos/${user}/${repo}/pulls/${pullNum}`;
+            const prRes = await fetch(`${GITHUB_API}${prRoute}`, {
+                method: 'GET',
+                headers: {'Content-Type': 'application/json'}
+            });
+            const prData = await prRes.json();
+            // Pull Request Files
+            const fileRoute = `${prRoute}/files`;
+            const fileRes = await fetch(`${GITHUB_API}${fileRoute}`, {
+                method: 'GET',
+                headers: {'Content-Type': 'application/json'}
+            });
+            const fileData = await fileRes.json();
+            const files = [];
+            let foundMatch = false;
+            for (let i=0; i<fileData.length; i++) {
+                const parts = fileData[i].filename.split('/');
+                if (parts[parts.length-1].includes(GITMAP_EXT)) {
+                    foundMatch = true;
+                    // Base file
+                    files.push(`https://raw.githubusercontent.com/${prData.base.user.login}/${repo}/${prData.base.sha}/${fileData[i].filename}`);
+                    // Head file
+                    files.push(`https://raw.githubusercontent.com/${prData.head.user.login}/${repo}/${prData.head.sha}/${fileData[i].filename}`);
+
+                    await this.fetchFiles(files);
+                }
+            }
+            if (!foundMatch) {
+                alert('This PR does not contain gitmap JSON files');
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    /**
+     *  Fetch raw github files through our server
+     *  to avoid CORS
+     */
+    fetchFiles = async (files) => {
+        const data = [];
+        for (let i=0; i<files.length; i++) {
+            const fileRes = await fetchData('GET', `files/${files[i]}`);
+            data.push(fileRes.data);
+        };
+
+        this.viewDiff(data[0], data[1]);
     }
 
     setup = (graph) => {
@@ -59,7 +121,7 @@ class PullRequestPage extends React.Component {
         });
     }
 
-    viewDiff = () => {
+    viewDiff = (left, right) => {
         const { leftGraph, rightGraph } = graphDiffSeparate(left, right);
 
         this.setState({
@@ -95,9 +157,9 @@ class PullRequestPage extends React.Component {
                 <div className="absolute z-10">
                     <button
                         className="border border-blue-700 rounded px-2 py-1 cursor-pointer"
-                        onClick={this.viewDiff}
+                        onClick={evt => alert('TODO')}
                     >
-                        View Diff
+                        Edit
                     </button>
                     <button
                         className="border border-blue-700 rounded px-2 py-1 cursor-pointer"
