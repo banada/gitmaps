@@ -1,7 +1,6 @@
 import express from 'express';
 import authController from '../../../controllers/auth/authController';
 
-const axios = require('axios');
 const auth = express.Router();
 
 const clientID = process.env.GITHUB_CLIENT_ID;

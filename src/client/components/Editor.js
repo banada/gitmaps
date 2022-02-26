@@ -1,6 +1,5 @@
 import '@babel/polyfill';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import edgehandles from 'cytoscape-edgehandles';
 import popper from 'cytoscape-popper';
 import contextMenus from 'cytoscape-context-menus';
@@ -181,20 +180,6 @@ class Editor extends React.Component {
         // TODO
         const res = await fetchData('GET', `auth/signin-github?code=${code}`);
         console.log(res);
-    }
-
-    getUser = () => {
-        const { search } = useLocation();
-        console.log(search);
-        const query = new URLSearchParams(search, [search]);
-        console.log(query);
-        if (query.has('access_token')) {
-            const accessToken = query.has('access_token');
-            console.log(accessToken);
-            fetch('https://api.github.com/user', { headers: { Authorization: `token ${accessToken}` } })
-                .then(res = res.json())
-                .then(res => this.setState({name: `${res.name}`}));
-        }
     }
 
     createNode = (position) => {
