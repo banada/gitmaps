@@ -247,7 +247,10 @@ class Editor extends React.Component {
     render() {
         return (
             <>
-                <div className="absolute z-10">
+                <div className="absolute z-10 flex justify-between w-full -mt-6">
+                    <div className="p-2 text-white font-bold text-2xl">
+                        GitMaps.com
+                    </div>
                     <div className="p-2">
                         <button
                             className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"

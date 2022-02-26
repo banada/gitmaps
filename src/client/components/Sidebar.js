@@ -37,7 +37,7 @@ class Sidebar extends React.Component {
         const text = this.renderText(this.props.node?.description);
 
         return (
-            <div className="absolute z-10 h-full w-1/3 right-0 top-0 bg-blue-200 shadow-lg px-6">
+            <div id="sidebar" className="absolute z-10 h-full w-1/3 right-0 top-0 shadow-lg px-6">
                 {(this.state.mode === SidebarMode.View) &&
                     <>
                         {(!this.props.noEditing) &&
@@ -51,7 +51,7 @@ class Sidebar extends React.Component {
                             </div>
                         }
                         <div className="mt-4">
-                            <div className="flex justify-center items-center mt-4 font-semibold text-xl">
+                            <div className="flex justify-center items-center mt-4 font-semibold text-2xl">
                                 <div
                                     className="w-full"
                                 >
