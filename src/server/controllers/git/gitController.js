@@ -13,10 +13,25 @@ const gitCommit = async (req, res, next) => {
         console.log(`Hello ${result.data.login}`);
         const username = result.data.login;
 
-        const refResult = await octokit.rest.git.getRef({
+        const master = await octokit.rest.git.getRef({
             owner: username,
             repo: 'graph-test',
-            ref: 'heads/test-pr'
+            ref: 'heads/master'
+        });
+        console.log(master.data);
+
+        // Branch off of master
+        const newRefResult = await octokit.rest.git.createRef({
+            owner: username,
+            repo: 'graph-test',
+            ref: 'refs/heads/newbranch4',
+            sha: master.data.object.sha
+        });
+
+        const branch = await octokit.rest.git.getRef({
+            owner: username,
+            repo: 'graph-test',
+            ref: 'heads/newbranch4'
         });
 
 /*
@@ -26,8 +41,8 @@ const gitCommit = async (req, res, next) => {
             repo: 'graph-test'
         });
         */
-        console.log(refResult);
-        const commitSHA = refResult.data.object.sha;
+        console.log(branch);
+        const commitSHA = branch.data.object.sha;
         const files = [
             {
                 mode: '100644',
@@ -36,31 +51,31 @@ const gitCommit = async (req, res, next) => {
             }
         ]
 
-        const result2 = await octokit.rest.git.createTree({
+        const tree = await octokit.rest.git.createTree({
             owner: username,
             repo: 'graph-test',
             tree: files,
             base_tree: commitSHA
         });
-        console.log(result2);
-        const result3 = await octokit.rest.git.createCommit({
+        console.log(tree);
+        const newCommit = await octokit.rest.git.createCommit({
             owner: username,
             repo: 'graph-test',
             author: {
                 name: 'Nathaniel Chen',
                 email: 'nathaniel@chengen.co'
             },
-            tree: result2.data.sha,
+            tree: tree.data.sha,
             message: 'Added something!',
             parents: [commitSHA]
         });
-        console.log(result3);
+        console.log(newCommit);
 
         const pushRes = await octokit.rest.git.updateRef({
             owner: username,
             repo: 'graph-test',
-            ref: 'heads/test-pr',
-            sha: result3.data.sha
+            ref: 'heads/newbranch4',
+            sha: newCommit.data.sha
         });
         console.log(pushRes);
 
