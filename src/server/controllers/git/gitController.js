@@ -1,5 +1,4 @@
-import { Octokit, App } from 'octokit';
-import { Base64 } from 'js-base64';
+import { Octokit } from 'octokit';
 import { isUn } from '../../../utils/utils';
 import test from './test.json';
 
@@ -24,30 +23,23 @@ const gitCommit = async (req, res, next) => {
         const newRefResult = await octokit.rest.git.createRef({
             owner: username,
             repo: 'graph-test',
-            ref: 'refs/heads/newbranch4',
+            ref: 'refs/heads/newbranch6',
             sha: master.data.object.sha
         });
 
         const branch = await octokit.rest.git.getRef({
             owner: username,
             repo: 'graph-test',
-            ref: 'heads/newbranch4'
+            ref: 'heads/newbranch6'
         });
 
-/*
-        // Get SHA
-        const shaResult = await octokit.rest.repos.listCommits({
-            owner: username,
-            repo: 'graph-test'
-        });
-        */
         console.log(branch);
         const commitSHA = branch.data.object.sha;
         const files = [
             {
                 mode: '100644',
                 path: 'gitmap.json',
-                content: Base64.encode(JSON.stringify(test))
+                content: JSON.stringify(test)
             }
         ]
 
@@ -74,7 +66,7 @@ const gitCommit = async (req, res, next) => {
         const pushRes = await octokit.rest.git.updateRef({
             owner: username,
             repo: 'graph-test',
-            ref: 'heads/newbranch4',
+            ref: 'heads/newbranch6',
             sha: newCommit.data.sha
         });
         console.log(pushRes);
