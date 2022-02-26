@@ -3,16 +3,15 @@ import { checkHeaders, checkJWT, checkJWTError, checkUser } from '../../middlewa
 /*
 import user from '@api/v1/user/user';
 import upload from '@api/v1/upload/upload';
-import auth from '@api/v1/auth/auth';
 import access from '@api/v1/access/access'
 */
-
+import auth from '@api/v1/auth/auth';
 import files from '@api/v1/files/files';
 
 const v1 = express.Router();
 
 v1.use('/files', files);
-
+v1.use('/auth', auth);
 /*
 // Upload images and other assets
 v1.use('/upload',
@@ -21,7 +20,6 @@ v1.use('/upload',
     checkJWTError,
     upload);
 
-v1.use('/auth', auth);
 
 // Users
 v1.use('/user',
