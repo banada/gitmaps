@@ -40,65 +40,24 @@ class PullRequestPage extends React.Component {
             const user = this.props.match.params.user;
             const repo = this.props.match.params.repo;
             const pullNum = this.props.match.params.pullNum;
-            // Pull Request Data
-            const prRoute = `/repos/${user}/${repo}/pulls/${pullNum}`;
-            const prRes = await fetch(`${GITHUB_API}${prRoute}`, {
-                method: 'GET',
-                headers: {'Content-Type': 'application/json'}
-            });
-            const prData = await prRes.json();
-            // Pull Request Files
-            const fileRoute = `${prRoute}/files`;
-            const fileRes = await fetch(`${GITHUB_API}${fileRoute}`, {
-                method: 'GET',
-                headers: {'Content-Type': 'application/json'}
-            });
-            const fileData = await fileRes.json();
-            const files = [];
-            let foundMatch = false;
-            for (let i=0; i<fileData.length; i++) {
-                const parts = fileData[i].filename.split('/');
-                if (parts[parts.length-1].includes(GITMAP_EXT)) {
-                    foundMatch = true;
-                    // Base file
-                    files.push(`https://raw.githubusercontent.com/${prData.base.user.login}/${repo}/${prData.base.sha}/${fileData[i].filename}`);
-                    // Head file
-                    files.push(`https://raw.githubusercontent.com/${prData.head.user.login}/${repo}/${prData.head.sha}/${fileData[i].filename}`);
 
-                    await this.fetchFiles(files);
-                    this.setState({
-                        branches: {
-                            left: prData.base.label,
-                            right: prData.head.label
-                        }
-                    });
+            const url = `files/${user}/${repo}/${pullNum}`;
+            const res = await fetchData('GET', url);
 
-                    // Found the first graph
-                    // TODO figure out how to handle
-                    // PRs with multiple graphs
-                    break;
+            const base = JSON.parse(res.data.base.data);
+            const head = JSON.parse(res.data.head.data);
+
+            this.setState({
+                branches: {
+                    left: res.data.base.ref,
+                    right: res.data.head.ref
                 }
-            }
-            if (!foundMatch) {
-                alert('This PR does not contain gitmap JSON files');
-            }
+            });
+
+            this.viewDiff(base, head);
         } catch (err) {
             console.log(err);
         }
-    }
-
-    /**
-     *  Fetch raw github files through our server
-     *  to avoid CORS
-     */
-    fetchFiles = async (files) => {
-        const data = [];
-        for (let i=0; i<files.length; i++) {
-            const fileRes = await fetchData('GET', `files/${files[i]}`);
-            data.push(fileRes.data);
-        };
-
-        this.viewDiff(data[0], data[1]);
     }
 
     setup = (graph) => {
