@@ -232,7 +232,7 @@ class Editor extends React.Component {
         const data = "data:text/json;charset=utf-8," + encodeURIComponent(json);
         const downloadEl = document.getElementById('download');
         download.setAttribute('href', data);
-        //download.click();
+        download.click();
     }
 
     handleUpload = (evt) => {
