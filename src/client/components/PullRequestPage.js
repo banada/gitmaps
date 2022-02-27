@@ -170,7 +170,7 @@ class PullRequestPage extends React.Component {
     render() {
         return (
             <>
-                <div className="absolute z-10 flex justify-between w-full -mt-6">
+                <div className="absolute z-10 flex justify-between w-full">
                     <div className="p-2 text-white font-bold text-2xl">
                         GitMaps.com
                     </div>
