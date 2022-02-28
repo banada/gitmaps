@@ -24,6 +24,7 @@ const getAuthenticatedUser = async () => {
     try {
       // NOTE: Requires user scope for private information
         user = await octokit.rest.users.getAuthenticated();
+        console.log(`Authenticated user: ${user}`);
     } catch (err) {
         console.log('Error getting authenticated user data');
     }
@@ -48,7 +49,7 @@ const getUsernameForAuthenticatedUser = async () => {
  * 
  * @param {string} owner
  * @param {string} repo 
- * @return {object} The newly forked repo. Null if the call fails.
+ * @return {object} The newly forked repo. Undefined if the call fails.
  */
 const forkRepo = async (repo, owner) => {
     let repo;
@@ -57,6 +58,7 @@ const forkRepo = async (repo, owner) => {
             owner,
             repo,
         });
+        console.log(`Forked repo: ${repo}`);
     } catch (err) {
         console.log(`Unable to fork ${owner}'s ${repo}`);
     }
@@ -74,10 +76,11 @@ const forkRepo = async (repo, owner) => {
 const canAccessRepo = async (repo, owner) => {
     let result = false;
     try {
-        await octokit.rest.repos.get({
+        const repo = await octokit.rest.repos.get({
             owner,
             repo,
         });
+        console.log(`Repo accessed: ${repo}`);
         result = true;
     } catch (err) {
         console.log(`Error checking access rights: ${err}`);
@@ -97,11 +100,12 @@ const canAccessRepo = async (repo, owner) => {
 const branchExists = async (branch, repo, owner) => {
     let result = false;
     try {
-        await octokit.rest.repos.getBranch({
+        const branch = await octokit.rest.repos.getBranch({
             owner,
             repo,
             branch,
         });
+        console.log(`Branch get: ${branch}`);
         result = true;
     } catch (err) {
         console.log(`Error verifying whether branch exists: ${err}`);
@@ -121,6 +125,7 @@ const branchExists = async (branch, repo, owner) => {
 const createBranch = async (branch, repo, owner) => {
     let branchSHA;
     try {
+        console.log('===== CREATING BRANCH =====');
         const username = await getUsernameForAuthenticatedUser();
 
         // Get master branch
@@ -129,6 +134,7 @@ const createBranch = async (branch, repo, owner) => {
             repo: repo,
             ref: 'heads/master'
         });
+        console.log(`Master branch: ${master}`);
         const masterSHA = master.data.object.sha
 
         // Branch off of master
@@ -145,6 +151,7 @@ const createBranch = async (branch, repo, owner) => {
             repo: repo,
             ref: `heads/${branch}`
         });
+        console.log(`New branch: ${newBranch}`);
         branchSHA = newBranch.data.object.sha;
     } catch (err) {
         console.log(`Error creating new branch: ${err}`);
@@ -186,6 +193,7 @@ const commitBranch = async (branch, repo, owner, content, branchSHA, msg) => {
             tree: files,
             base_tree: branchSHA,
         });
+        console.log(`Updated tree: ${updatedIndex}`);
 
         // Commit the changes
         const newCommit = await octokit.rest.git.createCommit({
@@ -199,6 +207,7 @@ const commitBranch = async (branch, repo, owner, content, branchSHA, msg) => {
             message: msg,
             parents: [branchSHA]
         });
+        console.log(`New commit: ${newCommit}`);
 
         // Pushes the commit
         const pushRes = await octokit.rest.git.updateRef({
@@ -207,6 +216,7 @@ const commitBranch = async (branch, repo, owner, content, branchSHA, msg) => {
             ref: `heads/${branch}`,
             sha: newCommit.data.sha,
         });
+        console.log(`Pushed commit: ${pushRes}`);
         branchSHA = newCommit.data.sha;
     } catch (err) {
         console.log(`Error creating new branch: ${err}`);
