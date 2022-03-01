@@ -7,7 +7,7 @@ const files = express.Router();
  * Read a file, avoiding CORS
  *
  */
-files.get('/*', async (req, res, next) => {
+files.get('/:user/:repo/:pr', async (req, res, next) => {
     return await filesController.readFile(req, res, next);
 });
 
