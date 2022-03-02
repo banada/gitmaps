@@ -204,13 +204,15 @@ class Editor extends React.Component {
     }
 
     loginWithGithub = () => {
-        window.location = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${window.location}`
+        const scopes = 'user repo';
+        window.location = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${window.location}&scope=${scopes}`
     }
 
     getAccessToken = async (code) => {
-        // TODO
         const res = await fetchData('GET', `auth/signin-github?code=${code}`);
-        console.log(res);
+        if (res.status === 200) {
+            window.location = this.props.match.url;
+        }
     }
 
     createNode = (position) => {

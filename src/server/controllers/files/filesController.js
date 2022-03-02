@@ -16,6 +16,28 @@ const octokit = new Octokit({
     }
 });
 
+/**
+ *  getAccessToken
+ *
+ *  Get and parse the access token from session cookies.
+ *
+ *  @param  {object} session Session object.
+ *  @return {string}         GitHub API token or undefined.
+ */
+const getAccessToken = (session) => {
+    let result;
+    const ghapi = session.ghapi;
+    if (ghapi) {
+        const queryToken = ghapi.split('access_token=')[1];
+        if (queryToken) {
+            const token = queryToken.split('&')[0];
+            result = token;
+        }
+    }
+
+    return result;
+}
+
 const readFilesByPullRequest = async (req, res, next) => {
 
     //TODO validate
@@ -25,24 +47,27 @@ const readFilesByPullRequest = async (req, res, next) => {
     const pull_number = req.params.pr;
 
     try {
+        const access_token = getAccessToken(req.session);
+
         // Get a pull request
-        const pullRequest = await octokit.rest.pulls.get({
+        const pullRequest = await gitService.getPullRequest({
             owner,
             repo,
-            pull_number
+            pull_number,
+            access_token
         });
 
         const base = pullRequest.data.base;
         const head = pullRequest.data.head;
 
         // Get pull request file path
-        const prFiles = await octokit.rest.pulls.listFiles({
+        const prFiles = await gitService.getPullRequestFiles({
             owner,
             repo,
-            pull_number
+            pull_number,
+            access_token
         });
 
-        //console.log(prFiles.data);
         let matchedFilePath;
         for (let i=0; i<prFiles.data.length; i++) {
             const file = prFiles.data[i];
@@ -58,14 +83,16 @@ const readFilesByPullRequest = async (req, res, next) => {
             owner: base.user.login,
             repo,
             path: matchedFilePath,
-            ref: base.ref
+            ref: base.ref,
+            access_token
         });
 
         const headBlob = await gitService.readFileBlob({
             owner: head.user.login,
             repo,
             path: matchedFilePath,
-            ref: head.ref
+            ref: head.ref,
+            access_token
         });
 
         res.status(200);
@@ -92,11 +119,27 @@ const readFileByBranch = async (req, res, next) => {
         const repo = req.params.repo;
         const branch = req.params.branch;
         const path = req.params[0];
+
+        const access_token = getAccessToken(req.session);
+        if (!access_token) {
+            return res.sendStatus(401);
+        }
+        const isPublic = await gitService.isRepoPublic({
+            owner,
+            repo,
+            access_token
+        });
+
+        if (!isPublic) {
+            return res.sendStatus(403);
+        }
+
         const blob = await gitService.readFileBlob({
             owner,
             repo,
             path,
-            ref: branch
+            ref: branch,
+            access_token
         });
         if (!blob) {
             return res.sendStatus(404);

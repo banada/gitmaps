@@ -1,5 +1,9 @@
 import { Octokit } from 'octokit';
 import { isUn } from '../../../utils/utils';
+import axios from 'axios';
+import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
+
+const GITHUB_URL = 'https://api.github.com';
 
 /*
  * Mode for a file to be committed as a blob.
@@ -72,13 +76,17 @@ const forkRepo = async (repo, owner) => {
  * @return {boolean} Returns true if the repository is public,
  * otherwise false.
  */
-const isRepoPublic = async (owner, repo) => {
+const isRepoPublic = async ({owner, repo, access_token}) => {
     let result = false;
     try {
-        const repoData = await octokit.rest.repos.get({
-            owner,
-            repo
+        const url = `${GITHUB_URL}/repos/${owner}/${repo}`;
+        const repoData = await axios.get(url, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': `token ${access_token}`
+            }
         });
+
         if (!repoData) {
             result = false;
         }
@@ -87,6 +95,7 @@ const isRepoPublic = async (owner, repo) => {
         }
     } catch (err) {
         console.log(`Error checking access rights: ${err}`);
+        console.log(err);
     }
 
     return result;
@@ -252,24 +261,62 @@ const commitBranch = async (branch, repo, owner, content, branchSHA, msg) => {
     return branchSHA;
 }
 
-const readFileBlob = async ({owner, repo, path, ref}) => {
+const readFileBlob = async ({owner, repo, path, ref, access_token}) => {
     try {
-        const file = await octokit.rest.repos.getContent({
-            owner,
-            repo,
-            path,
-            ref
+        const repoUrl = `${GITHUB_URL}/repos/${owner}/${repo}/contents/${path}?ref=${ref}`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const file = await axios.get(repoUrl, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
         });
-        if (!file) {
+        if (!file?.data?.sha) {
             return undefined;
         }
-        const blob = await octokit.rest.git.getBlob({
-            owner,
-            repo,
-            file_sha: file.data?.sha
+        const blobUrl = `${GITHUB_URL}/repos/${owner}/${repo}/git/blobs/${file.data.sha}`;
+        const blob = await axios.get(blobUrl, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
         });
 
         return blob;
+    } catch (err) {
+        throw err;
+    }
+}
+
+const getPullRequest = async ({owner, repo, pull_number, access_token}) => {
+    try {
+        const prUrl = `${GITHUB_URL}/repos/${owner}/${repo}/pulls/${pull_number}`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const pullRequest = await axios.get(prUrl, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
+        });
+
+        return pullRequest;
+    } catch (err) {
+        throw err;
+    }
+}
+
+const getPullRequestFiles = async ({owner, repo, pull_number, access_token}) => {
+    try {
+        const prFilesUrl = `${GITHUB_URL}/repos/${owner}/${repo}/pulls/${pull_number}/files`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const pullRequestFiles = await axios.get(prFilesUrl, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
+        });
+
+        return pullRequestFiles;
     } catch (err) {
         throw err;
     }
@@ -279,7 +326,9 @@ const gitService = {
     forkRepo,
     canAccessRepo,
     isRepoPublic,
-    readFileBlob
+    readFileBlob,
+    getPullRequest,
+    getPullRequestFiles
 }
 
 export default gitService;
