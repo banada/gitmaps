@@ -37,11 +37,11 @@ class PullRequestPage extends React.Component {
 
     fetchPullRequestFiles = async () => {
         try {
-            const user = this.props.match.params.user;
+            const owner = this.props.match.params.owner;
             const repo = this.props.match.params.repo;
             const pullNum = this.props.match.params.pullNum;
 
-            const url = `files/${user}/${repo}/${pullNum}`;
+            const url = `files/${owner}/${repo}/${pullNum}`;
             const res = await fetchData('GET', url);
 
             const base = JSON.parse(res.data.base.data);

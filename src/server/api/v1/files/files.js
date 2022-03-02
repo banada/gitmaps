@@ -7,8 +7,12 @@ const files = express.Router();
  * Read a file, avoiding CORS
  *
  */
-files.get('/:user/:repo/:pr', async (req, res, next) => {
-    return await filesController.readFile(req, res, next);
+files.get('/:owner/:repo/:pr', async (req, res, next) => {
+    return await filesController.readFilesByPullRequest(req, res, next);
+});
+
+files.get('/:owner/:repo/:branch/*', async (req, res, next) => {
+    return await filesController.readFileByBranch(req, res, next);
 });
 
 export default files;

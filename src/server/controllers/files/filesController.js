@@ -2,6 +2,8 @@ import axios from 'axios';
 import Base64 from 'js-base64';
 import { Octokit } from 'octokit';
 import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
+
+import gitService from '@services/git/gitService';
 import { isUn } from '../../../utils/utils';
 
 const GITMAP_EXT = '.json';
@@ -14,11 +16,11 @@ const octokit = new Octokit({
     }
 });
 
-const readFile = async (req, res, next) => {
+const readFilesByPullRequest = async (req, res, next) => {
 
     //TODO validate
 
-    const owner = req.params.user;
+    const owner = req.params.owner;
     const repo = req.params.repo;
     const pull_number = req.params.pr;
 
@@ -52,29 +54,18 @@ const readFile = async (req, res, next) => {
         }
 
         // Get files from each branch
-        const baseFile = await octokit.rest.repos.getContent({
+        const baseBlob = await gitService.readFileBlob({
             owner: base.user.login,
             repo,
             path: matchedFilePath,
             ref: base.ref
         });
-        const headFile = await octokit.rest.repos.getContent({
+
+        const headBlob = await gitService.readFileBlob({
             owner: head.user.login,
             repo,
             path: matchedFilePath,
             ref: head.ref
-        });
-
-        // Get gitmap blob
-        const baseBlob = await octokit.rest.git.getBlob({
-            owner: base.user.login,
-            repo,
-            file_sha: baseFile.data.sha
-        });
-        const headBlob = await octokit.rest.git.getBlob({
-            owner: head.user.login,
-            repo,
-            file_sha: headFile.data.sha
         });
 
         res.status(200);
@@ -95,8 +86,34 @@ const readFile = async (req, res, next) => {
     }
 }
 
+const readFileByBranch = async (req, res, next) => {
+    try {
+        const owner = req.params.owner;
+        const repo = req.params.repo;
+        const branch = req.params.branch;
+        const path = req.params[0];
+        const blob = await gitService.readFileBlob({
+            owner,
+            repo,
+            path,
+            ref: branch
+        });
+        if (!blob) {
+            return res.sendStatus(404);
+        }
+        res.status(200);
+        return res.json({
+            data: Base64.decode(blob.data.content),
+        });
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+}
+
 const filesController = {
-    readFile,
+    readFilesByPullRequest,
+    readFileByBranch
 }
 
 export default filesController;

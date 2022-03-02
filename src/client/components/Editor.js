@@ -28,13 +28,44 @@ class Editor extends React.Component {
     }
 
     componentDidMount = () => {
-        this.setup();
+        const owner = this.props.match?.params?.owner;
+        const repo = this.props.match?.params?.repo;
+        const branch = this.props.match?.params?.branch;
+        const path = this.props.match.params[0];
+        if (branch) {
+            this.setState({
+                owner,
+                repo,
+                branch,
+                path
+            }, () => {
+                this.getGraphFromBranch();
+            });
+        // New
+        } else {
+            this.setup();
+        }
 
         const queryParams = this.props.location?.search;
         if (queryParams) {
             // TODO Hack, parse properly
             const code = queryParams.split('?code=')[1];
             this.getAccessToken(code);
+        }
+    }
+
+    getGraphFromBranch = async () => {
+        try {
+            const url = `files/${this.state.owner}/${this.state.repo}/${this.state.branch}/${this.state.path}`;
+            const {status, data} = await fetchData('GET', url);
+            if (status !== 200) {
+                alert('Failed to load graph.');
+            }
+            const graph = JSON.parse(data.data);
+
+            this.setup(graph);
+        } catch (err) {
+            console.log(err);
         }
     }
 

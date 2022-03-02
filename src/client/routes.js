@@ -20,11 +20,11 @@ export const Paths = {
 
 const routes = [
     {
-        path: '/:user/:repo/pull/:pullNum',
+        path: '/:owner/:repo/pull/:pullNum',
         component: PullRequestPage
     },
     {
-        path: '/:user/:repo',
+        path: '/:owner/:repo/blob/:branch/*',
         component: Editor
     },
     {
