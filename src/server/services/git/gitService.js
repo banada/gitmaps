@@ -1,6 +1,5 @@
 import { Octokit } from 'octokit';
 import { isUn } from '../../../utils/utils';
-import test from './test.json';
 
 /*
  * Mode for a file to be committed as a blob.
@@ -52,18 +51,45 @@ const getUsernameForAuthenticatedUser = async () => {
  * @return {object} The newly forked repo. Undefined if the call fails.
  */
 const forkRepo = async (repo, owner) => {
-    let repo;
+    let repoData;
     try {
-        repo = await octokit.rest.repos.createFork({
+        repoData = await octokit.rest.repos.createFork({
             owner,
-            repo,
+            repo
         });
         console.log(`Forked repo: ${repo}`);
     } catch (err) {
         console.log(`Unable to fork ${owner}'s ${repo}`);
+        console.log(err);
+    }
+    return repoData;
+}
+
+/*
+ * Checks whether a repository is public
+ *
+ * @param {string} repo 
+ * @return {boolean} Returns true if the repository is public,
+ * otherwise false.
+ */
+const isRepoPublic = async (owner, repo) => {
+    let result = false;
+    try {
+        const repoData = await octokit.rest.repos.get({
+            owner,
+            repo
+        });
+        if (!repoData) {
+            result = false;
+        }
+        if (repoData.data.visibility === 'public') {
+            result = true;
+        }
+    } catch (err) {
+        console.log(`Error checking access rights: ${err}`);
     }
 
-    return repo;
+    return result;
 }
 
 /*
@@ -76,14 +102,16 @@ const forkRepo = async (repo, owner) => {
 const canAccessRepo = async (repo, owner) => {
     let result = false;
     try {
-        const repo = await octokit.rest.repos.get({
+        const repoData = await octokit.rest.repos.get({
             owner,
-            repo,
+            repo
         });
         console.log(`Repo accessed: ${repo}`);
+        console.log(repoData);
         result = true;
     } catch (err) {
         console.log(`Error checking access rights: ${err}`);
+        console.log(err);
     }
 
     return result;
@@ -140,7 +168,7 @@ const createBranch = async (branch, repo, owner) => {
         // Branch off of master
         await octokit.rest.git.createRef({
             owner: username,
-            repo: repo 
+            repo: repo ,
             ref: `refs/heads/${branch}`,
             sha: masterSHA
         });
@@ -169,7 +197,6 @@ const createBranch = async (branch, repo, owner) => {
  * @return {string} Returns SHA1 of the newly created branch.
  */
 const commitBranch = async (branch, repo, owner, content, branchSHA, msg) => {
-    let branchSHA;
     try {
         const user = await getAuthenticatedUser();
         if (!user) {
@@ -225,8 +252,34 @@ const commitBranch = async (branch, repo, owner, content, branchSHA, msg) => {
     return branchSHA;
 }
 
+const readFileBlob = async ({owner, repo, path, ref}) => {
+    try {
+        const file = await octokit.rest.repos.getContent({
+            owner,
+            repo,
+            path,
+            ref
+        });
+        if (!file) {
+            return undefined;
+        }
+        const blob = await octokit.rest.git.getBlob({
+            owner,
+            repo,
+            file_sha: file.data?.sha
+        });
+
+        return blob;
+    } catch (err) {
+        throw err;
+    }
+}
+
 const gitService = {
     forkRepo,
+    canAccessRepo,
+    isRepoPublic,
+    readFileBlob
 }
 
 export default gitService;
