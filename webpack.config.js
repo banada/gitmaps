@@ -69,6 +69,7 @@ const serverBundle = {
             '@services': path.resolve(__dirname, 'src/server/services'),
             '@types': path.resolve(__dirname, 'src/types'),
             '@utils': path.resolve(__dirname, 'src/utils'),
+            '@serverutils': path.resolve(__dirname, 'src/server/utils'),
         }
     },
     module: {

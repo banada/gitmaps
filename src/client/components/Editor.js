@@ -52,6 +52,19 @@ class Editor extends React.Component {
             const code = queryParams.split('?code=')[1];
             this.getAccessToken(code);
         }
+
+        this.checkUser();
+    }
+
+    checkUser = async () => {
+        // Check if logged in
+        const url = `git/user`
+        const {status, data} = await fetchData('GET', url);
+        if ((status === 200) && (data)) {
+            this.setState({
+                user: data.user
+            });
+        }
     }
 
     getGraphFromBranch = async () => {
@@ -297,7 +310,23 @@ class Editor extends React.Component {
         reader.readAsText(file);
     }
 
-    
+    save = () => {
+        const repo = this.state.repo;
+        if (repo) {
+            // Check if owner
+            if (this.state.owner !== this.state.user) {
+                // TODO fork?
+            }
+            // TODO get branches
+            // TODO choose branch
+            // TODO commit
+            // TODO force push
+
+        } else {
+            // TODO create new repo
+            // TODO choose branch
+        }
+    }
 
     render() {
         return (
@@ -320,15 +349,28 @@ class Editor extends React.Component {
                             Export JSON
                         </button>
                     </div>
-                    <div className="p-2">
-                        <button
-                            className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
-                            style={{ borderColor: '#85d1ff' }}
-                            onClick={this.loginWithGithub}
-                        >
-                            Log in with GitHub
-                        </button>
-                    </div>
+                    {(this.state.user) &&
+                        <div className="p-2">
+                            <button
+                                className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                style={{ borderColor: '#85d1ff' }}
+                                onClick={this.save}
+                            >
+                                Save
+                            </button>
+                        </div>
+                    }
+                    {(!this.state.user) &&
+                        <div className="p-2">
+                            <button
+                                className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                style={{ borderColor: '#85d1ff' }}
+                                onClick={this.loginWithGithub}
+                            >
+                                Log in with GitHub
+                            </button>
+                        </div>
+                    }
                     {/*
                     <input
                         type="file"

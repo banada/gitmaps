@@ -17,5 +17,9 @@ git.get('/', async (req, res, next) => {
     return await gitController.gitCommit(req, res, next);
 });
 
+git.get('/user', async (req, res, next) => {
+    return await gitController.getAuthenticatedUser(req, res, next);
+});
+
 export default git;
 

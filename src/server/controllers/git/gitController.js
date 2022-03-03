@@ -1,4 +1,7 @@
 import { Octokit } from 'octokit';
+
+import gitService from '@services/git/gitService';
+import { getAccessToken } from '@serverutils/utils';
 import { isUn } from '../../../utils/utils';
 import test from './test.json';
 
@@ -127,9 +130,32 @@ const gitCommit = async (req, res, next) => {
     }
 }
 
+const getAuthenticatedUser = async (req, res, next) => {
+    try {
+        const access_token = getAccessToken(req.session);
+        if (!access_token) {
+            return res.sendStatus(401);
+        }
+
+        const user = await gitService.getAuthenticatedUser({
+            access_token
+        });
+        if (!user?.data?.login) {
+            return res.sendStatus(401);
+        }
+
+        res.status(200);
+        return res.json({user: user.data.login});
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+}
+
 const gitController = {
     createRepo,
     gitCommit,
+    getAuthenticatedUser
 }
 
 export default gitController;

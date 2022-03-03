@@ -3,6 +3,7 @@ import Base64 from 'js-base64';
 import { Octokit } from 'octokit';
 import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
 
+import { getAccessToken } from '@serverutils/utils';
 import gitService from '@services/git/gitService';
 import { isUn } from '../../../utils/utils';
 
@@ -15,28 +16,6 @@ const octokit = new Octokit({
         clientSecret: process.env.GITHUB_CLIENT_SECRET
     }
 });
-
-/**
- *  getAccessToken
- *
- *  Get and parse the access token from session cookies.
- *
- *  @param  {object} session Session object.
- *  @return {string}         GitHub API token or undefined.
- */
-const getAccessToken = (session) => {
-    let result;
-    const ghapi = session.ghapi;
-    if (ghapi) {
-        const queryToken = ghapi.split('access_token=')[1];
-        if (queryToken) {
-            const token = queryToken.split('&')[0];
-            result = token;
-        }
-    }
-
-    return result;
-}
 
 const readFilesByPullRequest = async (req, res, next) => {
 
