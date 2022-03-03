@@ -22,12 +22,19 @@ const octokit = new Octokit({
 /*
  * Gets the authenticated user.
  */
-const getAuthenticatedUser = async () => {
+const getAuthenticatedUser = async ({access_token}) => {
     let user;
     try {
-      // NOTE: Requires user scope for private information
-        user = await octokit.rest.users.getAuthenticated();
-        console.log(`Authenticated user: ${user}`);
+        const userUrl = `${GITHUB_URL}/user`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const user = await axios.get(userUrl, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
+        });
+
+        return user;
     } catch (err) {
         console.log('Error getting authenticated user data');
     }
@@ -323,6 +330,7 @@ const getPullRequestFiles = async ({owner, repo, pull_number, access_token}) => 
 }
 
 const gitService = {
+    getAuthenticatedUser,
     forkRepo,
     canAccessRepo,
     isRepoPublic,
