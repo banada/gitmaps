@@ -124,15 +124,6 @@ const readFileByBranch = async (req, res, next) => {
         if (!access_token) {
             return res.sendStatus(401);
         }
-        const isPublic = await gitService.isRepoPublic({
-            owner,
-            repo,
-            access_token
-        });
-
-        if (!isPublic) {
-            return res.sendStatus(403);
-        }
 
         const blob = await gitService.readFileBlob({
             owner,
@@ -141,7 +132,7 @@ const readFileByBranch = async (req, res, next) => {
             ref: branch,
             access_token
         });
-        if (!blob) {
+        if (!blob?.data?.content) {
             return res.sendStatus(404);
         }
         res.status(200);
