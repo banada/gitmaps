@@ -11,6 +11,7 @@ import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
 import ForkModal from './ForkModal';
 import BranchModal from './BranchModal';
+import CommitModal from './CommitModal';
 import Sidebar from './Sidebar';
 import styles from './cyto.css';
 
@@ -311,8 +312,7 @@ class Editor extends React.Component {
         reader.readAsText(file);
     }
 
-    // TODO rename
-    save = async () => {
+    startSaveFlow = async () => {
         const repo = this.state.repo;
         if (repo) {
             // Check if owner
@@ -329,8 +329,6 @@ class Editor extends React.Component {
                 branchModal: true,
                 branches
             });
-            // TODO choose branch
-            // TODO commit
             // TODO force push
 
         } else {
@@ -353,6 +351,21 @@ class Editor extends React.Component {
             branchModal: false,
             commitModal: true
         });
+    }
+
+    commitAndPush = async (message) => {
+        const url = `git/save`;
+        const {status, data} = await fetchData('POST', url, {
+            owner: this.state.owner,
+            repo: this.state.repo,
+            branch: this.state.branch,
+            path: this.state.path,
+            //TODO content: 
+            message
+        });
+        if (status === 200) {
+            console.log(data);
+        }
     }
 
     render() {
@@ -381,7 +394,7 @@ class Editor extends React.Component {
                             <button
                                 className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
                                 style={{ borderColor: '#85d1ff' }}
-                                onClick={this.save}
+                                onClick={this.startSaveFlow}
                             >
                                 Save
                             </button>
@@ -428,6 +441,11 @@ class Editor extends React.Component {
                     <BranchModal
                         branches={this.state.branches}
                         onSelect={this.selectBranch}
+                    />
+                }
+                {(this.state.commitModal) &&
+                    <CommitModal
+                        onCommit={this.commitAndPush}
                     />
                 }
             </>

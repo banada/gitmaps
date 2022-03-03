@@ -4,13 +4,19 @@ class BranchModal extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {};
+        this.state = {
+            allowSubmit: false
+        }
     }
 
     onChangeBranch = (evt) => {
-        this.setState({
-            branch: evt.target.value
-        });
+        const branch = evt.target.value;
+        if (branch !== '') {
+            this.setState({
+                branch: evt.target.value,
+                allowSubmit: true
+            });
+        }
     }
 
     render() {
@@ -38,14 +44,16 @@ class BranchModal extends React.Component {
                             {branches}
                         </select>
                     </div>
-                    <div className="flex justify-center">
-                        <div
-                            className="mt-4 p-2 rounded cursor-pointer bg-blue-200 w-1/2"
-                            onClick={e => this.props.onSelect(this.state.branch)}
-                        >
-                            Select
+                    {(this.state.allowSubmit) &&
+                        <div className="flex justify-center">
+                            <div
+                                className="mt-4 p-2 rounded cursor-pointer bg-blue-200 w-1/2"
+                                onClick={e => this.props.onSelect(this.state.branch)}
+                            >
+                                Select
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
         );
