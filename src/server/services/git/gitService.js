@@ -329,6 +329,23 @@ const getPullRequestFiles = async ({owner, repo, pull_number, access_token}) => 
     }
 }
 
+const getBranches = async ({owner, repo, access_token}) => {
+    try {
+        const branchesUrl = `${GITHUB_URL}/repos/${owner}/${repo}/branches`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const branches = await axios.get(branchesUrl, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
+        });
+
+        return branches;
+    } catch (err) {
+        throw err;
+    }
+}
+
 const gitService = {
     getAuthenticatedUser,
     forkRepo,
@@ -336,7 +353,8 @@ const gitService = {
     isRepoPublic,
     readFileBlob,
     getPullRequest,
-    getPullRequestFiles
+    getPullRequestFiles,
+    getBranches
 }
 
 export default gitService;
