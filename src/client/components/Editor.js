@@ -10,6 +10,7 @@ import isEqual from 'lodash.isequal';
 import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
 import ForkModal from './ForkModal';
+import BranchModal from './BranchModal';
 import Sidebar from './Sidebar';
 import styles from './cyto.css';
 
@@ -324,7 +325,7 @@ class Editor extends React.Component {
             }
             // Get branches
             const branches = await this.getBranches();
-            this.setStatus({
+            this.setState({
                 branchModal: true,
                 branches
             });
@@ -344,6 +345,14 @@ class Editor extends React.Component {
         if ((status === 200) && (data)) {
             return data;
         }
+    }
+
+    selectBranch = (branch) => {
+        this.setState({
+            selectedBranch: branch,
+            branchModal: false,
+            commitModal: true
+        });
     }
 
     render() {
@@ -413,6 +422,12 @@ class Editor extends React.Component {
                 }
                 {(this.state.forkModal) &&
                     <ForkModal
+                    />
+                }
+                {(this.state.branchModal) &&
+                    <BranchModal
+                        branches={this.state.branches}
+                        onSelect={this.selectBranch}
                     />
                 }
             </>
