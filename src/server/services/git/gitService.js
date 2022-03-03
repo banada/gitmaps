@@ -212,23 +212,34 @@ const createBranch = async (branch, repo, owner) => {
  * @param {string} repo 
  * @return {string} Returns SHA1 of the newly created branch.
  */
-const commitBranch = async (branch, repo, owner, content, branchSHA, msg) => {
+const commitBranch = async ({owner, repo, branch, path, message, content, access_token}) => {
     try {
-        const user = await getAuthenticatedUser();
-        if (!user) {
-            // TODO: Figure out how to short circuit
-            return branchSHA;
-        }
+        // Get branch
+        const branchData = await getBranch({owner, repo, branch, access_token});
+        const branchSHA = branchData.data.commit.sha;
 
         // Create the file to commit
         const files = [
             {
                 mode: blobMode,
-                path: defaultGitmapPath,
+                path,
                 content: JSON.stringify(content),
             }
         ]
 
+        const treeUrl = `${GITHUB_URL}/repos/${owner}/${repo}/git/trees`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const tree = await axios.post(treeUrl, {
+            data: {
+                tree: files,
+                base_tree: branchSHA
+            },
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
+        });
+/*
         // Update the index
         const updatedIndex = await octokit.rest.git.createTree({
             owner: username,
@@ -261,11 +272,11 @@ const commitBranch = async (branch, repo, owner, content, branchSHA, msg) => {
         });
         console.log(`Pushed commit: ${pushRes}`);
         branchSHA = newCommit.data.sha;
+        */
     } catch (err) {
         console.log(`Error creating new branch: ${err}`);
+        throw err;
     }
-
-    return branchSHA;
 }
 
 const readFileBlob = async ({owner, repo, path, ref, access_token}) => {
@@ -329,6 +340,23 @@ const getPullRequestFiles = async ({owner, repo, pull_number, access_token}) => 
     }
 }
 
+const getBranch = async ({owner, repo, branch, access_token}) => {
+    try {
+        const branchUrl = `${GITHUB_URL}/repos/${owner}/${repo}/branches/${branch}`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const branchData = await axios.get(branchUrl, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
+        });
+
+        return branchData;
+    } catch (err) {
+        throw err;
+    }
+}
+
 const getBranches = async ({owner, repo, access_token}) => {
     try {
         const branchesUrl = `${GITHUB_URL}/repos/${owner}/${repo}/branches`;
@@ -351,9 +379,11 @@ const gitService = {
     forkRepo,
     canAccessRepo,
     isRepoPublic,
+    commitBranch,
     readFileBlob,
     getPullRequest,
     getPullRequestFiles,
+    getBranch,
     getBranches
 }
 

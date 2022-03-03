@@ -180,11 +180,41 @@ const getBranches = async (req, res, next) => {
         return res.sendStatus(500);
     }
 }
+
+const commitAndPush = async (req, res, next) => {
+    try {
+        const owner = req.body.owner;
+        const repo = req.body.repo;
+        const branch = req.body.branch;
+        const path = req.body.path;
+        const message = req.body.message;
+        const content = {hello: 'world'};
+        const access_token = getAccessToken(req.session);
+        if (!access_token) {
+            return res.sendStatus(401);
+        }
+
+        const branches = await gitService.commitBranch({
+            owner,
+            repo,
+            branch,
+            message,
+            content,
+            access_token
+        });
+
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+}
+
 const gitController = {
     createRepo,
     gitCommit,
     getAuthenticatedUser,
-    getBranches
+    getBranches,
+    commitAndPush
 }
 
 export default gitController;

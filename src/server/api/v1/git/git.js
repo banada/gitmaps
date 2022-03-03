@@ -25,5 +25,9 @@ git.get('/repos/:owner/:repo/branches', async (req, res, next) => {
     return await gitController.getBranches(req, res, next);
 });
 
+git.post('/save', async (req, res, next) => {
+    return await gitController.commitAndPush(req, res, next);
+});
+
 export default git;
 
