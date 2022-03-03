@@ -21,5 +21,9 @@ git.get('/user', async (req, res, next) => {
     return await gitController.getAuthenticatedUser(req, res, next);
 });
 
+git.get('/repos/:owner/:repo/branches', async (req, res, next) => {
+    return await gitController.getBranches(req, res, next);
+});
+
 export default git;
 

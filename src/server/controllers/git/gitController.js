@@ -152,10 +152,39 @@ const getAuthenticatedUser = async (req, res, next) => {
     }
 }
 
+const getBranches = async (req, res, next) => {
+    try {
+        const owner = req.params.owner;
+        const repo = req.params.repo;
+        const access_token = getAccessToken(req.session);
+        if (!access_token) {
+            return res.sendStatus(401);
+        }
+
+        const branches = await gitService.getBranches({
+            owner,
+            repo,
+            access_token
+        });
+        if (!branches?.data) {
+            return res.sendStatus(404);
+        }
+
+        const result = branches.data.map((b) => {
+            return b.name;
+        });
+
+        return res.json(result);
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+}
 const gitController = {
     createRepo,
     gitCommit,
-    getAuthenticatedUser
+    getAuthenticatedUser,
+    getBranches
 }
 
 export default gitController;

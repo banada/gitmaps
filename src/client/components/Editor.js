@@ -9,7 +9,7 @@ import isEqual from 'lodash.isequal';
 
 import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
-
+import ForkModal from './ForkModal';
 import Sidebar from './Sidebar';
 import styles from './cyto.css';
 
@@ -310,14 +310,24 @@ class Editor extends React.Component {
         reader.readAsText(file);
     }
 
-    save = () => {
+    // TODO rename
+    save = async () => {
         const repo = this.state.repo;
         if (repo) {
             // Check if owner
             if (this.state.owner !== this.state.user) {
-                // TODO fork?
+                // TODO check if user has this repo forked
+                // TODO ask to fork
+                this.setState({
+                    forkModal: true
+                });
             }
-            // TODO get branches
+            // Get branches
+            const branches = await this.getBranches();
+            this.setStatus({
+                branchModal: true,
+                branches
+            });
             // TODO choose branch
             // TODO commit
             // TODO force push
@@ -325,6 +335,14 @@ class Editor extends React.Component {
         } else {
             // TODO create new repo
             // TODO choose branch
+        }
+    }
+
+    getBranches = async () => {
+        const url = `git/repos/${this.state.owner}/${this.state.repo}/branches`;
+        const {status, data} = await fetchData('GET', url);
+        if ((status === 200) && (data)) {
+            return data;
         }
     }
 
@@ -391,6 +409,10 @@ class Editor extends React.Component {
                         node={this.state.cytoscape.$(`node[id = "${this.state.detailNode}"]`).data()}
                         onEdit={this.editNode}
                         onClose={this.closeSidebar}
+                    />
+                }
+                {(this.state.forkModal) &&
+                    <ForkModal
                     />
                 }
             </>
