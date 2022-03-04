@@ -219,7 +219,7 @@ class Editor extends React.Component {
     }
 
     loginWithGithub = () => {
-        const scopes = 'user repo';
+        const scopes = 'user%20repo';
         window.location = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${window.location}&scope=${scopes}`
     }
 
@@ -256,6 +256,10 @@ class Editor extends React.Component {
 
     closeSidebar = () => this.setState({detailNode: null});
 
+    onExportJSON = () => {
+        this.downloadJSON(this.exportJSON());
+    }
+
     exportJSON = () => {
         const elements = this.state.cytoscape.json().elements;
         // Filter out junk
@@ -277,6 +281,11 @@ class Editor extends React.Component {
         });
 
         const json = JSON.stringify({nodes, edges});
+
+        return json;
+    };
+
+    downloadJSON = (json) => {
         const data = "data:text/json;charset=utf-8," + encodeURIComponent(json);
         const downloadEl = document.getElementById('download');
         download.setAttribute('href', data);
@@ -360,11 +369,12 @@ class Editor extends React.Component {
             repo: this.state.repo,
             branch: this.state.branch,
             path: this.state.path,
-            //TODO content: 
+            content: this.exportJSON(),
             message
         });
         if (status === 200) {
             console.log(data);
+            alert('Saved!');
         }
     }
 
@@ -384,7 +394,7 @@ class Editor extends React.Component {
                         <button
                             className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
                             style={{ borderColor: '#85d1ff' }}
-                            onClick={this.exportJSON}
+                            onClick={this.onExportJSON}
                         >
                             Export JSON
                         </button>

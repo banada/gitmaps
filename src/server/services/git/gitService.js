@@ -214,67 +214,77 @@ const createBranch = async (branch, repo, owner) => {
  */
 const commitBranch = async ({owner, repo, branch, path, message, content, access_token}) => {
     try {
-        // Get branch
+        // Get user
+        const user = await getAuthenticatedUser({access_token});
+        // Get branch ref
         const branchData = await getBranch({owner, repo, branch, access_token});
         const branchSHA = branchData.data.commit.sha;
 
         // Create the file to commit
         const files = [
             {
-                mode: blobMode,
                 path,
-                content: JSON.stringify(content),
+                mode: blobMode,
+                type: 'blob',
+                content
             }
         ]
-
+        // Create tree
         const treeUrl = `${GITHUB_URL}/repos/${owner}/${repo}/git/trees`;
         const auth = access_token ? `token ${access_token}`: '';
-        const tree = await axios.post(treeUrl, {
-            data: {
+        const treeData = await axios.post(treeUrl,
+            {
                 tree: files,
                 base_tree: branchSHA
             },
-            headers: {
-                'Accept': 'application/vnd.github.v3+json',
-                'Authorization': auth
+            {
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Authorization': auth
+                }
             }
-        });
-/*
-        // Update the index
-        const updatedIndex = await octokit.rest.git.createTree({
-            owner: username,
-            repo: repo,
-            tree: files,
-            base_tree: branchSHA,
-        });
-        console.log(`Updated tree: ${updatedIndex}`);
-
+        );
         // Commit the changes
-        const newCommit = await octokit.rest.git.createCommit({
-            owner: username,
-            repo: repo,
-            author: {
-                name: user.name,
-                email: user.email, 
+        const commitUrl = `${GITHUB_URL}/repos/${owner}/${repo}/git/commits`;
+        const commitData = await axios.post(commitUrl,
+            {
+                message,
+                tree: treeData?.data?.sha,
+                parents: [branchSHA],
+                author: {
+                    name: user?.data?.name,
+                    email: user?.data?.email, 
+                }
             },
-            tree: updatedIndex.data.sha,
-            message: msg,
-            parents: [branchSHA]
-        });
-        console.log(`New commit: ${newCommit}`);
+            {
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Authorization': auth
+                }
+            }
+        );
+        const newCommitSHA = commitData?.data?.sha;
 
-        // Pushes the commit
-        const pushRes = await octokit.rest.git.updateRef({
-            owner: username,
-            repo: repo,
-            ref: `heads/${branch}`,
-            sha: newCommit.data.sha,
-        });
-        console.log(`Pushed commit: ${pushRes}`);
-        branchSHA = newCommit.data.sha;
-        */
+        // Push the commit
+        const ref = `heads/${branch}`;
+        const pushUrl = `${GITHUB_URL}/repos/${owner}/${repo}/git/refs/${ref}`;
+        const push = await axios.patch(pushUrl,
+            {
+                ref,
+                sha: newCommitSHA
+            },
+            {
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Authorization': auth
+                }
+            }
+        );
+
+        return push?.data?.url;
     } catch (err) {
-        console.log(`Error creating new branch: ${err}`);
+        console.log(err);
+        console.log(`Error: ${err}`);
         throw err;
     }
 }
@@ -369,6 +379,23 @@ const getBranches = async ({owner, repo, access_token}) => {
         });
 
         return branches;
+    } catch (err) {
+        throw err;
+    }
+}
+
+const getRef = async ({owner, repo, branch, access_token}) => {
+    try {
+        const refUrl = `${GITHUB_URL}/repos/${owner}/${repo}/git/ref/heads/${branch}`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const refData = await axios.get(refUrl, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
+        });
+
+        return refData;
     } catch (err) {
         throw err;
     }
