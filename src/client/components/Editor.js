@@ -6,6 +6,8 @@ import contextMenus from 'cytoscape-context-menus';
 import 'cytoscape-context-menus/cytoscape-context-menus.css';
 import compoundDragAndDrop from 'cytoscape-compound-drag-and-drop';
 import isEqual from 'lodash.isequal';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
@@ -74,7 +76,9 @@ class Editor extends React.Component {
             const url = `files/${this.state.owner}/${this.state.repo}/${this.state.branch}/${this.state.path}`;
             const {status, data} = await fetchData('GET', url);
             if (status !== 200) {
-                alert('Failed to load graph.');
+                return this.setState({
+                    error: 'Please log in to view this graph.'
+                });
             }
             const graph = JSON.parse(data.data);
 
@@ -373,8 +377,7 @@ class Editor extends React.Component {
             message
         });
         if (status === 200) {
-            console.log(data);
-            alert('Saved!');
+            toast.success('Saved!');
         }
     }
 
@@ -392,42 +395,30 @@ class Editor extends React.Component {
                     <div className="p-2 text-white font-bold text-2xl">
                         GitMaps.com
                     </div>
-                    <div>
-                        {(this.state.name) &&
-                            <h3>Hello {this.state.name} </h3>
+                    <div className="flex justify-between items-center">
+                        {(this.state.user) &&
+                            <div className="p-2">
+                                <button
+                                    className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                    style={{ borderColor: '#85d1ff' }}
+                                    onClick={this.startSaveFlow}
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        }
+                        {(!this.state.error) &&
+                            <div className="p-2">
+                                <button
+                                    className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                    style={{ borderColor: '#85d1ff' }}
+                                    onClick={this.onExportJSON}
+                                >
+                                    Export JSON
+                                </button>
+                            </div>
                         }
                     </div>
-                    <div className="p-2">
-                        <button
-                            className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
-                            style={{ borderColor: '#85d1ff' }}
-                            onClick={this.onExportJSON}
-                        >
-                            Export JSON
-                        </button>
-                    </div>
-                    {(this.state.user) &&
-                        <div className="p-2">
-                            <button
-                                className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
-                                style={{ borderColor: '#85d1ff' }}
-                                onClick={this.startSaveFlow}
-                            >
-                                Save
-                            </button>
-                        </div>
-                    }
-                    {(!this.state.user) &&
-                        <div className="p-2">
-                            <button
-                                className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
-                                style={{ borderColor: '#85d1ff' }}
-                                onClick={this.loginWithGithub}
-                            >
-                                Log in with GitHub
-                            </button>
-                        </div>
-                    }
                     {/*
                     <input
                         type="file"
@@ -466,6 +457,32 @@ class Editor extends React.Component {
                         onCommit={this.commitAndPush}
                         onClose={this.closeModals}
                     />
+                }
+                <ToastContainer
+                    position="bottom-center"
+                    autoClose={1000}
+                    hideProgressBar
+                    newestOntop
+                />
+                {(this.state.error) &&
+                    <div className="flex flex-col justify-center items-center z-10 absolute w-full h-full">
+                        <span
+                            className="text-2xl text-blue-300 font-semibold"
+                        >
+                            {this.state.error}
+                        </span>
+                        {(!this.state.user) &&
+                            <div className="p-2 mt-2">
+                                <button
+                                    className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                    style={{ borderColor: '#85d1ff' }}
+                                    onClick={this.loginWithGithub}
+                                >
+                                    Log in with GitHub
+                                </button>
+                            </div>
+                        }
+                    </div>
                 }
             </>
         );
