@@ -378,6 +378,13 @@ class Editor extends React.Component {
         }
     }
 
+    closeModals = () => {
+        this.setState({
+            branchModal: false,
+            commitModal: false
+        });
+    }
+
     render() {
         return (
             <>
@@ -451,11 +458,13 @@ class Editor extends React.Component {
                     <BranchModal
                         branches={this.state.branches}
                         onSelect={this.selectBranch}
+                        onClose={this.closeModals}
                     />
                 }
                 {(this.state.commitModal) &&
                     <CommitModal
                         onCommit={this.commitAndPush}
+                        onClose={this.closeModals}
                     />
                 }
             </>

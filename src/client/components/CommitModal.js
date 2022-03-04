@@ -22,14 +22,14 @@ class CommitModal extends React.Component {
                     <div className="">
                         <textarea
                             rows="5"
-                            className="bg-gray-200"
+                            className="bg-gray-200 rounded p-2"
                             selected
                             ref={this.message}
                         ></textarea>
                     </div>
                     <div className="flex justify-center">
                         <div
-                            className="mt-4 p-2 rounded cursor-pointer bg-blue-200 w-1/2"
+                            className="my-4 p-2 rounded cursor-pointer bg-blue-200 w-1/2"
                             onClick={e => this.props.onCommit(this.message.current.value)}
                         >
                             Commit and Push
