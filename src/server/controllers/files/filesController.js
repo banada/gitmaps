@@ -100,9 +100,6 @@ const readFileByBranch = async (req, res, next) => {
         const path = req.params[0];
 
         const access_token = getAccessToken(req.session);
-        if (!access_token) {
-            return res.sendStatus(401);
-        }
 
         const blob = await gitService.readFileBlob({
             owner,
