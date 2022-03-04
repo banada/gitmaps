@@ -59,21 +59,29 @@ const getUsernameForAuthenticatedUser = async () => {
  * 
  * @param {string} owner
  * @param {string} repo 
- * @return {object} The newly forked repo. Undefined if the call fails.
+ * @param {string} access_token 
+ * @return {object} The newly forked ref url.
  */
-const forkRepo = async (repo, owner) => {
-    let repoData;
+const forkRepo = async (owner, repo, access_token) => {
     try {
-        repoData = await octokit.rest.repos.createFork({
-            owner,
-            repo
-        });
-        console.log(`Forked repo: ${repo}`);
+        const url = `${GITHUB_URL}/repos/${owner}/${repo}/forks`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const forkData = await axios.post(url,
+            {
+            },
+            {
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Authorization': auth
+                }
+            }
+        );
+        console.log(forkData);
+        return forkData?.data?.url;
     } catch (err) {
-        console.log(`Unable to fork ${owner}'s ${repo}`);
-        console.log(err);
+        console.log(`Error forking: ${err}`);
+        throw err;
     }
-    return repoData;
 }
 
 /*
@@ -216,6 +224,7 @@ const commitBranch = async ({owner, repo, branch, path, message, content, access
     try {
         // Get user
         const user = await getAuthenticatedUser({access_token});
+
         // Get branch ref
         const branchData = await getBranch({owner, repo, branch, access_token});
         const branchSHA = branchData.data.commit.sha;

@@ -29,5 +29,9 @@ git.post('/save', async (req, res, next) => {
     return await gitController.commitAndPush(req, res, next);
 });
 
+git.post('/repos/:owner/:repo/forks', async (req, res, next) => {
+    return await gitController.forkRepo(req, res, next);
+});
+
 export default git;
 
