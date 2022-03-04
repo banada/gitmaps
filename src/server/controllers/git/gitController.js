@@ -216,12 +216,36 @@ const commitAndPush = async (req, res, next) => {
     }
 }
 
+const forkRepo = async(req, res, next) => {
+    try {
+        const access_token = getAccessToken(req.session);
+        if (!access_token) {
+            return res.sendStatus(401);
+        }
+
+        const repo = req.body.repo;
+        const owner = req.body.owner;
+
+        const refUrl = await gitService.forkRepo(owner, repo, access_token);
+        if (!refUrl) {
+            return res.sendStatus(500);
+        }
+
+        res.status(200);
+        return res.json({ref: refUrl});
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+}
+
 const gitController = {
     createRepo,
     gitCommit,
     getAuthenticatedUser,
     getBranches,
-    commitAndPush
+    commitAndPush,
+    forkRepo
 }
 
 export default gitController;
