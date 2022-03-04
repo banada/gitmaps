@@ -188,20 +188,27 @@ const commitAndPush = async (req, res, next) => {
         const branch = req.body.branch;
         const path = req.body.path;
         const message = req.body.message;
-        const content = {hello: 'world'};
+        const content = req.body.content;
         const access_token = getAccessToken(req.session);
         if (!access_token) {
             return res.sendStatus(401);
         }
 
-        const branches = await gitService.commitBranch({
+        const commit = await gitService.commitBranch({
             owner,
             repo,
             branch,
+            path,
             message,
             content,
             access_token
         });
+
+        if (!commit) {
+            return res.sendStatus(500);
+        }
+
+        return res.sendStatus(200);
 
     } catch (err) {
         console.log(err);
