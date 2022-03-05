@@ -9,8 +9,10 @@ import isEqual from 'lodash.isequal';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import { Paths } from '../routes';
 import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
+import InstructionsModal from './modals/InstructionsModal';
 import ForkModal from './modals/ForkModal';
 import BranchModal from './modals/BranchModal';
 import CommitModal from './modals/CommitModal';
@@ -71,6 +73,16 @@ class Editor extends React.Component {
         const url = `git/user`
         const {status, data} = await fetchData('GET', url);
         if ((status === 200) && (data)) {
+            // New project
+            if (this.props.match.path === Paths.New) {
+                return this.setState({
+                    user: data.user,
+                    instructionsModal: true
+                }, () => {
+                    return this.setup();
+                })
+            }
+
             const contributorUrl = `git/repos/${owner}/${repo}/contributors/${data.user}`;
             const contributorRes = await fetchData('GET', contributorUrl);
             if (contributorRes.status === 200) {
@@ -80,6 +92,13 @@ class Editor extends React.Component {
                 });
             } else {
                 toast.error('Problem checking contributors.');
+            }
+        } else {
+            // New project
+            if (this.props.match.path === Paths.New) {
+                return this.setState({
+                    newProject: true
+                });
             }
         }
     }
@@ -371,6 +390,7 @@ class Editor extends React.Component {
             });
 
         } else {
+            alert('TODO: create new repo');
             // TODO create new repo
             // TODO choose branch
         }
@@ -452,11 +472,13 @@ class Editor extends React.Component {
         this.setState({
             branchModal: false,
             commitModal: false,
-            forkModal: false
+            forkModal: false,
+            instructionsModal: false
         });
     }
 
     render() {
+
         return (
             <>
                 <div className="absolute z-10 flex justify-between w-full">
@@ -560,6 +582,29 @@ class Editor extends React.Component {
                             </div>
                         }
                     </div>
+                }
+                {((this.state.newProject) && (!this.state.user)) &&
+                    <div className="flex flex-col justify-center items-center z-10 absolute w-full h-full">
+                        <span
+                            className="text-2xl text-blue-300 font-semibold"
+                        >
+                            Welcome to GitMaps!
+                        </span>
+                        <div className="p-2 mt-2">
+                            <button
+                                className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                style={{ borderColor: '#85d1ff' }}
+                                onClick={this.loginWithGithub}
+                            >
+                                Log in with GitHub
+                            </button>
+                        </div>
+                    </div>
+                }
+                {(this.state.instructionsModal) &&
+                    <InstructionsModal
+                        onClose={this.closeModals}
+                    />
                 }
             </>
         );
