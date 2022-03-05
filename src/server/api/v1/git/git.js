@@ -37,5 +37,9 @@ git.post('/repos/:owner/:repo/forks', async (req, res, next) => {
     return await gitController.forkRepo(req, res, next);
 });
 
+git.get('/repos/:owner/:repo/contributors/:user', async (req, res, next) => {
+    return await gitController.checkContributor(req, res, next);
+});
+
 export default git;
 

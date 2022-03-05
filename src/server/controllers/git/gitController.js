@@ -272,6 +272,26 @@ const forkRepo = async(req, res, next) => {
     }
 }
 
+const checkContributor = async (req, res, next) => {
+    try {
+        const owner = req.params.owner;
+        const repo = req.params.repo;
+        const user = req.params.user;
+        const access_token = getAccessToken(req.session);
+        if (!access_token) {
+            return res.sendStatus(401);
+        }
+
+        const isContributor = await gitService.checkContributor({owner, repo, user, access_token});
+
+        res.status(200);
+        return res.json({isContributor});
+
+    } catch (err) {
+        return res.sendStatus(500);
+    }
+}
+
 const gitController = {
     createRepo,
     gitCommit,
@@ -279,7 +299,8 @@ const gitController = {
     getBranches,
     createBranch,
     commitAndPush,
-    forkRepo
+    forkRepo,
+    checkContributor
 }
 
 export default gitController;

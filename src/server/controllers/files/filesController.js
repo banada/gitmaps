@@ -86,7 +86,6 @@ const readFilesByPullRequest = async (req, res, next) => {
             }
         });
     } catch (err) {
-        console.log(err);
         res.status(500);
         return res.send();
     }
@@ -116,8 +115,7 @@ const readFileByBranch = async (req, res, next) => {
             data: Base64.decode(blob.data.content),
         });
     } catch (err) {
-        console.log(err);
-        return res.sendStatus(500);
+        return res.sendStatus(err.response.status);
     }
 }
 
