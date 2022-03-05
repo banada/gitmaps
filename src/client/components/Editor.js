@@ -31,43 +31,55 @@ class Editor extends React.Component {
         this.state = {}
     }
 
-    componentDidMount = () => {
+    componentDidMount = async () => {
         const owner = this.props.match?.params?.owner;
         const repo = this.props.match?.params?.repo;
         const branch = this.props.match?.params?.branch;
         const path = this.props.match.params[0];
+
+        // Authenticate and redirect
+        const queryParams = this.props.location?.search;
+        if (queryParams) {
+            // TODO Hack, parse properly
+            const code = queryParams.split('?code=')[1];
+            return await this.getAccessToken(code);
+        }
+
+        await this.checkUser({owner, repo});
+
+        // Get graph
         if (branch) {
             this.setState({
                 owner,
                 repo,
                 branch,
                 path
-            }, () => {
-                this.getGraphFromBranch();
+            }, async () => {
+                await this.getGraphFromBranch();
             });
         // New
         } else {
             this.setup();
         }
-
-        const queryParams = this.props.location?.search;
-        if (queryParams) {
-            // TODO Hack, parse properly
-            const code = queryParams.split('?code=')[1];
-            this.getAccessToken(code);
-        }
-
-        this.checkUser();
     }
 
-    checkUser = async () => {
+    checkUser = async ({owner, repo}) => {
         // Check if logged in
         const url = `git/user`
         const {status, data} = await fetchData('GET', url);
         if ((status === 200) && (data)) {
-            this.setState({
-                user: data.user
-            });
+            const contributorUrl = `git/repos/${owner}/${repo}/contributors/${data.user}`;
+            const contributorRes = await fetchData('GET', contributorUrl);
+            if (contributorRes.status === 200) {
+                this.setState({
+                    user: data.user,
+                    isContributor: contributorRes.data.isContributor
+                });
+            } else {
+                toast.error('Problem checking contributors.');
+            }
+        } else {
+            toast.error('Problem getting user.');
         }
     }
 
@@ -76,10 +88,24 @@ class Editor extends React.Component {
             const url = `files/${this.state.owner}/${this.state.repo}/${this.state.branch}/${this.state.path}`;
             const {status, data} = await fetchData('GET', url);
             if (status !== 200) {
-                return this.setState({
-                    error: 'Please log in to view this graph.'
-                });
+                if (!this.state.user) {
+                    this.setState({
+                        error: 'Please log in to view this graph.'
+                    });
+                } else if (status === 404){
+                    this.setState({
+                        noAccess: true,
+                        error: "You don't have access to this repository."
+                    });
+                } else {
+                    this.setState({
+                        error: 'There was an error.'
+                    });
+                }
+
+                return;
             }
+
             const graph = JSON.parse(data.data);
 
             this.setup(graph);
@@ -218,7 +244,8 @@ class Editor extends React.Component {
 
         this.setState({
             cytoscape: cyto,
-            edgeHandler
+            edgeHandler,
+            graphLoaded: true
         });
     }
 
@@ -329,10 +356,10 @@ class Editor extends React.Component {
         const repo = this.state.repo;
         if (repo) {
             // Check if owner
-            if (this.state.owner !== this.state.user) {
+            if (!this.state.isContributor) {
                 // TODO check if user has this repo forked
                 // TODO ask to fork
-                this.setState({
+                return this.setState({
                     forkModal: true
                 });
             }
@@ -400,7 +427,8 @@ class Editor extends React.Component {
     closeModals = () => {
         this.setState({
             branchModal: false,
-            commitModal: false
+            commitModal: false,
+            forkModal: false
         });
     }
 
@@ -412,27 +440,31 @@ class Editor extends React.Component {
                         GitMaps.com
                     </div>
                     <div className="flex justify-between items-center">
-                        {(this.state.user) &&
-                            <div className="p-2">
-                                <button
-                                    className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
-                                    style={{ borderColor: '#85d1ff' }}
-                                    onClick={this.startSaveFlow}
-                                >
-                                    Save
-                                </button>
-                            </div>
-                        }
-                        {(!this.state.error) &&
-                            <div className="p-2">
-                                <button
-                                    className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
-                                    style={{ borderColor: '#85d1ff' }}
-                                    onClick={this.onExportJSON}
-                                >
-                                    Export JSON
-                                </button>
-                            </div>
+                        {(this.state.graphLoaded) &&
+                            <>
+                                {(this.state.user && !this.state.noAccess) &&
+                                    <div className="p-2">
+                                        <button
+                                            className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                            style={{ borderColor: '#85d1ff' }}
+                                            onClick={this.startSaveFlow}
+                                        >
+                                            Save
+                                        </button>
+                                    </div>
+                                }
+                                {(!this.state.error) &&
+                                    <div className="p-2">
+                                        <button
+                                            className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                            style={{ borderColor: '#85d1ff' }}
+                                            onClick={this.onExportJSON}
+                                        >
+                                            Export JSON
+                                        </button>
+                                    </div>
+                                }
+                            </>
                         }
                     </div>
                     {/*

@@ -29,7 +29,7 @@ class ForkModal extends React.Component {
                     <p className="text-2xl my-4">You don't have write access to this repository. Fork this project?</p>
                     <div className="flex justify-center">
                         <div
-                            className="my-4 p-2 rounded cursor-pointer bg-blue-200 w-1/2"
+                            className="mt-4 mb-8 p-2 rounded cursor-pointer bg-blue-200 w-1/2"
                             onClick={e => this.props.onFork}
                         >
                             Fork

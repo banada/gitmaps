@@ -207,45 +207,6 @@ const createBranch = async ({owner, repo, baseBranch, newBranch, access_token}) 
         throw err;
     }
 }
-/*
-const createBranch = async (branch, repo, owner) => {
-    let branchSHA;
-    try {
-        console.log('===== CREATING BRANCH =====');
-        const username = await getUsernameForAuthenticatedUser();
-
-        // Get master branch
-        const master = await octokit.rest.git.getRef({
-            owner: owner,
-            repo: repo,
-            ref: 'heads/master'
-        });
-        console.log(`Master branch: ${master}`);
-        const masterSHA = master.data.object.sha
-
-        // Branch off of master
-        await octokit.rest.git.createRef({
-            owner: username,
-            repo: repo ,
-            ref: `refs/heads/${branch}`,
-            sha: masterSHA
-        });
-
-        // Get branch info
-        const newBranch = await octokit.rest.git.getRef({
-            owner: username,
-            repo: repo,
-            ref: `heads/${branch}`
-        });
-        console.log(`New branch: ${newBranch}`);
-        branchSHA = newBranch.data.object.sha;
-    } catch (err) {
-        console.log(`Error creating new branch: ${err}`);
-    }
-
-    return branchSHA;
-}
-*/
 
 /*
  * Create and send the commit
@@ -466,6 +427,30 @@ const createRef = async ({owner, repo, branch, sha, access_token}) => {
     }
 }
 
+const checkContributor = async ({owner, repo, user, access_token}) => {
+    try {
+        const url = `${GITHUB_URL}/repos/${owner}/${repo}/contributors`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const contributors = await axios.get(url, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
+        });
+        const isContributor = false;
+        contributors.data.forEach((c) => {
+            if (c.login === user) {
+                isContributor = true;
+            }
+        });
+
+        return isContributor;
+    } catch (err) {
+        console.log(err);
+        throw err;
+    }
+}
+
 const gitService = {
     getAuthenticatedUser,
     forkRepo,
@@ -477,7 +462,8 @@ const gitService = {
     getPullRequestFiles,
     getBranch,
     getBranches,
-    createBranch
+    createBranch,
+    checkContributor
 }
 
 export default gitService;
