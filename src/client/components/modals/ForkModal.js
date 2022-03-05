@@ -1,10 +1,9 @@
 import React from 'react';
+import CloseIcon from '../icons/CloseIcon';
 
-class CommitModal extends React.Component {
+class ForkModal extends React.Component {
     constructor(props) {
         super(props);
-
-        this.message = React.createRef();
     }
 
     render() {
@@ -16,23 +15,24 @@ class CommitModal extends React.Component {
                     onClick={this.props.onClose}
                 ></div>
                 <div
-                    className="bg-white w-1/3 rounded z-50 mx-auto flex flex-col justify-center"
+                    className="bg-white w-1/2 rounded z-50 mx-auto flex flex-col justify-center"
                 >
-                    <p className="text-2xl my-4">Write a commit message:</p>
-                    <div className="">
-                        <textarea
-                            rows="5"
-                            className="bg-gray-200 rounded p-2"
-                            selected
-                            ref={this.message}
-                        ></textarea>
+                    {/* Close Icon */}
+                    <div
+                        className="flex justify-end items-center cursor-pointer m-2"
+                        onClick={this.props.onClose}
+                    >
+                        <CloseIcon
+                            size={6}
+                        />
                     </div>
+                    <p className="text-2xl my-4">You don't have write access to this repository. Fork this project?</p>
                     <div className="flex justify-center">
                         <div
                             className="my-4 p-2 rounded cursor-pointer bg-blue-200 w-1/2"
-                            onClick={e => this.props.onCommit(this.message.current.value)}
+                            onClick={e => this.props.onFork}
                         >
-                            Commit and Push
+                            Fork
                         </div>
                     </div>
                 </div>
@@ -41,5 +41,5 @@ class CommitModal extends React.Component {
     }
 }
 
-export default CommitModal;
+export default ForkModal;
 
