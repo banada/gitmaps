@@ -14,6 +14,7 @@ import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
 import InstructionsModal from './modals/InstructionsModal';
 import ForkModal from './modals/ForkModal';
+import RepoModal from './modals/RepoModal';
 import BranchModal from './modals/BranchModal';
 import CommitModal from './modals/CommitModal';
 import Sidebar from './Sidebar';
@@ -390,9 +391,9 @@ class Editor extends React.Component {
             });
 
         } else {
-            alert('TODO: create new repo');
-            // TODO create new repo
-            // TODO choose branch
+            this.setState({
+                repoModal: true
+            });
         }
     }
 
@@ -468,11 +469,20 @@ class Editor extends React.Component {
         }
     }
 
+    createRepo = async () => {
+        try {
+            alert('TODO: Create repo')
+        } catch (err) {
+            throw err;
+        }
+    }
+
     closeModals = () => {
         this.setState({
+            forkModal: false,
+            repoModal: false,
             branchModal: false,
             commitModal: false,
-            forkModal: false,
             instructionsModal: false
         });
     }
@@ -541,6 +551,12 @@ class Editor extends React.Component {
                         onFork={this.forkRepo}
                         owner={this.state.owner}
                         repo={this.state.repo}
+                    />
+                }
+                {(this.state.repoModal) &&
+                    <RepoModal
+                        onSelect={this.createRepo}
+                        onClose={this.closeModals}
                     />
                 }
                 {(this.state.branchModal) &&
