@@ -26,13 +26,22 @@ class ForkModal extends React.Component {
                             size={6}
                         />
                     </div>
-                    <p className="text-2xl my-4">You don't have write access to this repository. Fork this project?</p>
+                    <p
+                        className="text-xl p-4 pb-0"
+                    >
+                        You don't have write access to {this.props.owner}/{this.props.repo}.
+                    </p>
+                    <p
+                        className="text-lg p-4"
+                    >
+                        Use your fork? If it doesn't exist, it will be created.
+                    </p>
                     <div className="flex justify-center">
                         <div
                             className="mt-4 mb-8 p-2 rounded cursor-pointer bg-blue-200 w-1/2"
-                            onClick={e => this.props.onFork}
+                            onClick={this.props.onFork}
                         >
-                            Fork
+                            OK
                         </div>
                     </div>
                 </div>

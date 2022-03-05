@@ -17,6 +17,9 @@ import CommitModal from './modals/CommitModal';
 import Sidebar from './Sidebar';
 import styles from './cyto.css';
 
+const URL_OWNER_IDX = 1;
+const URL_BRANCH_IDX = 4;
+
 // Handle is shared by all nodes
 const handleDiv = document.createElement('div');
 handleDiv.id = 'handle';
@@ -78,8 +81,6 @@ class Editor extends React.Component {
             } else {
                 toast.error('Problem checking contributors.');
             }
-        } else {
-            toast.error('Problem getting user.');
         }
     }
 
@@ -357,8 +358,7 @@ class Editor extends React.Component {
         if (repo) {
             // Check if owner
             if (!this.state.isContributor) {
-                // TODO check if user has this repo forked
-                // TODO ask to fork
+                // Ask to fork
                 return this.setState({
                     forkModal: true
                 });
@@ -369,7 +369,6 @@ class Editor extends React.Component {
                 branchModal: true,
                 branches
             });
-            // TODO force push
 
         } else {
             // TODO create new repo
@@ -421,6 +420,31 @@ class Editor extends React.Component {
         if (status === 200) {
             toast.success('Saved!');
             this.closeModals();
+            // Redirect to the repo we just forked
+            if (this.state.owner !== this.props.match?.params?.owner) {
+                const splitUrl = this.props.match.url.split('/');
+                splitUrl[URL_OWNER_IDX] = this.state.owner;
+                splitUrl[URL_BRANCH_IDX] = this.state.selectedBranch;
+                window.location = splitUrl.join('/');
+            }
+        }
+    }
+
+    forkRepo = async () => {
+        try {
+            const url = `git/repos/${this.state.owner}/${this.state.repo}/forks`;
+            const {status, data} = await fetchData('POST', url, {});
+            if (status === 200) {
+                this.setState({
+                    forkModal: false,
+                    owner: this.state.user,
+                    isContributor: true
+                }, async () => {
+                    await this.startSaveFlow();
+                });
+            }
+        } catch (err) {
+            throw err;
         }
     }
 
@@ -492,6 +516,9 @@ class Editor extends React.Component {
                 {(this.state.forkModal) &&
                     <ForkModal
                         onClose={this.closeModals}
+                        onFork={this.forkRepo}
+                        owner={this.state.owner}
+                        repo={this.state.repo}
                     />
                 }
                 {(this.state.branchModal) &&

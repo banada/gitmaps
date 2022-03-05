@@ -4,6 +4,10 @@ import axios from 'axios';
 import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
 
 const GITHUB_URL = 'https://api.github.com';
+// GitHub requires a name/email for commits, but
+// users are not required to put it on their profile
+const ANON_NAME = 'GitMaps User';
+const ANON_EMAIL = 'anon@gitmaps.com';
 
 /*
  * Mode for a file to be committed as a blob.
@@ -62,13 +66,11 @@ const getUsernameForAuthenticatedUser = async () => {
  * @param {string} access_token 
  * @return {object} The newly forked ref url.
  */
-const forkRepo = async (owner, repo, access_token) => {
+const forkRepo = async ({owner, repo, access_token}) => {
     try {
         const url = `${GITHUB_URL}/repos/${owner}/${repo}/forks`;
         const auth = access_token ? `token ${access_token}`: '';
-        const forkData = await axios.post(url,
-            {
-            },
+        const forkData = await axios.post(url, {},
             {
                 headers: {
                     'Accept': 'application/vnd.github.v3+json',
@@ -76,7 +78,7 @@ const forkRepo = async (owner, repo, access_token) => {
                 }
             }
         );
-        console.log(forkData);
+
         return forkData?.data?.url;
     } catch (err) {
         console.log(`Error forking: ${err}`);
@@ -220,6 +222,7 @@ const commitBranch = async ({owner, repo, branch, path, message, content, access
     try {
         // Get user
         const user = await getAuthenticatedUser({access_token});
+        console.log(user);
 
         // Get branch ref
         const branchData = await getBranch({owner, repo, branch, access_token});
@@ -257,8 +260,8 @@ const commitBranch = async ({owner, repo, branch, path, message, content, access
                 tree: treeData?.data?.sha,
                 parents: [branchSHA],
                 author: {
-                    name: user?.data?.name,
-                    email: user?.data?.email, 
+                    name: user?.data?.name || ANON_NAME,
+                    email: user?.data?.email || ANON_EMAIL,
                 }
             },
             {
@@ -428,6 +431,10 @@ const createRef = async ({owner, repo, branch, sha, access_token}) => {
 }
 
 const checkContributor = async ({owner, repo, user, access_token}) => {
+    if (owner === user) {
+        return true;
+    }
+
     try {
         const url = `${GITHUB_URL}/repos/${owner}/${repo}/contributors`;
         const auth = access_token ? `token ${access_token}`: '';
