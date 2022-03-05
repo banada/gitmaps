@@ -84,12 +84,12 @@ class Editor extends React.Component {
                 })
             }
 
-            const contributorUrl = `git/repos/${owner}/${repo}/contributors/${data.user}`;
-            const contributorRes = await fetchData('GET', contributorUrl);
-            if (contributorRes.status === 200) {
+            const accessUrl = `git/repos/${owner}/${repo}`;
+            const accessRes = await fetchData('GET', accessUrl);
+            if (accessRes.status === 200) {
                 this.setState({
                     user: data.user,
-                    isContributor: contributorRes.data.isContributor
+                    hasAccess: accessRes.data.hasAccess
                 });
             } else {
                 toast.error('Problem checking contributors.');
@@ -377,7 +377,7 @@ class Editor extends React.Component {
         const repo = this.state.repo;
         if (repo) {
             // Check if owner
-            if (!this.state.isContributor) {
+            if (!this.state.hasAccess) {
                 // Ask to fork
                 return this.setState({
                     forkModal: true
@@ -459,7 +459,7 @@ class Editor extends React.Component {
                 this.setState({
                     forkModal: false,
                     owner: this.state.user,
-                    isContributor: true
+                    hasAccess: true
                 }, async () => {
                     await this.startSaveFlow();
                 });
@@ -622,6 +622,13 @@ class Editor extends React.Component {
                         onClose={this.closeModals}
                     />
                 }
+                <div className="absolute z-10 flex justify-between w-full bottom-0">
+                    {(this.state.repo) &&
+                        <div className="p-2 text-white text-2xl">
+                            {this.state.owner}/{this.state.repo}/{this.state.branch}
+                        </div>
+                    }
+                </div>
             </>
         );
     }

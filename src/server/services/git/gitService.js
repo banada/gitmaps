@@ -121,23 +121,27 @@ const isRepoPublic = async ({owner, repo, access_token}) => {
 /*
  * Checks whether authenticated user can access the repository 
  * 
- * @param {string} owner
- * @param {string} repo 
- * @return {boolean} Returns true if the user can access the repository, otherwise false.
+ * @param  {string}     owner
+ * @param  {string}     repo 
+ * @return {boolean}    Returns true if the user can access
+ *                      the repository, otherwise false.
  */
-const canAccessRepo = async (repo, owner) => {
+const canAccessRepo = async ({owner, repo, access_token}) => {
     let result = false;
     try {
-        const repoData = await octokit.rest.repos.get({
-            owner,
-            repo
+        const url = `${GITHUB_URL}/repos/${owner}/${repo}`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const repoData = await axios.get(url, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
         });
-        console.log(`Repo accessed: ${repo}`);
-        console.log(repoData);
-        result = true;
+        result = !!repoData?.data?.permissions?.push;
+
+        return result;
     } catch (err) {
         console.log(`Error checking access rights: ${err}`);
-        console.log(err);
     }
 
     return result;
