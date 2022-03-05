@@ -15,10 +15,16 @@ export const Paths = {
     Register: '/register',
     Login: '/login',
     Reset: '/reset',
-    Verification: '/verify'
+    Verification: '/verify',
+    New: '/new'
 }
 
 const routes = [
+    {
+        path: '/new',
+        exact: true,
+        component: Editor
+    },
     {
         path: '/:owner/:repo/pull/:pullNum',
         component: PullRequestPage
