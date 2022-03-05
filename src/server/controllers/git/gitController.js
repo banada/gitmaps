@@ -292,6 +292,23 @@ const checkContributor = async (req, res, next) => {
     }
 }
 
+const checkAccess = async (req, res, next) => {
+    try {
+        const owner = req.params.owner;
+        const repo = req.params.repo;
+        const access_token = getAccessToken(req.session);
+        if (!access_token) {
+            return res.sendStatus(401);
+        }
+        const hasAccess = await gitService.canAccessRepo({owner, repo, access_token});
+
+        res.status(200);
+        return res.json({hasAccess});
+    } catch (err) {
+        return res.sendStatus(500);
+    }
+}
+
 const gitController = {
     createRepo,
     gitCommit,
@@ -300,7 +317,8 @@ const gitController = {
     createBranch,
     commitAndPush,
     forkRepo,
-    checkContributor
+    checkContributor,
+    checkAccess
 }
 
 export default gitController;

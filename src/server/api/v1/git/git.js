@@ -41,5 +41,9 @@ git.get('/repos/:owner/:repo/contributors/:user', async (req, res, next) => {
     return await gitController.checkContributor(req, res, next);
 });
 
+git.get('/repos/:owner/:repo', async (req, res, next) => {
+    return await gitController.checkAccess(req, res, next);
+});
+
 export default git;
 
