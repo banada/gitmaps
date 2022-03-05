@@ -48,11 +48,13 @@ const readFilesByPullRequest = async (req, res, next) => {
         });
 
         let matchedFilePath;
+        let blobUrl;
         for (let i=0; i<prFiles.data.length; i++) {
             const file = prFiles.data[i];
             const parts = file.filename.split('/');
             if (parts[parts.length-1].includes(GITMAP_EXT)) {
                 matchedFilePath = file.filename;
+                blobUrl = file.blob_url;
             }
             break;
         }
@@ -83,7 +85,8 @@ const readFilesByPullRequest = async (req, res, next) => {
             head: {
                 data: Base64.decode(headBlob.data.content),
                 ref: head.label
-            }
+            },
+            blobUrl
         });
     } catch (err) {
         res.status(500);
