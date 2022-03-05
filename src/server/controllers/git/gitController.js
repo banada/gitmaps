@@ -11,42 +11,31 @@ const octokit = new Octokit({
 
 /**
  * Creates a repository under the user account.
- *
- * TODO: Move logic out into service
  */
 const createRepo = async (req, res, next) => {
     try {
-        // Authenticate
-        const result = await octokit.rest.users.getAuthenticated();
-        const username = result.data.login;
-        console.log(`Hello ${username}`);
-
-        // Extract the required user input to create a new repo
-        const description = req.body.description ?? 'Repository created by Gitmaps.'
-        const isPrivate = req.body.isPrivate ?? false;
-        const repo = req.body.repo;
-
-        // todo: Do we have to check for forks with the same name?
-        const repos = await octokit.rest.repos.listForUser({username});
-
-        // If repo already exists, send bad request. Otherwise, create it.
-        if(repos.data.map(r => r.name).includes(repo)) {
-            console.log(`${repo} already exists for ${username}`);
-            res.status(400);
-        } else {
-            console.log(`Creating repository "${repo}" for ${username}`);
-            await octokit.rest.repos.createForAuthenticatedUser({
-                name: repo,
-                description: description,
-                private: isPrivate,
-                auto_init: true
-            });
-            res.status(200);
+        const access_token = getAccessToken(req.session);
+        if (!access_token) {
+            return res.sendStatus(401);
         }
+
+        const repo_request = {
+            'name': req.body.name,
+            'private': req.body.isPrivate,
+        };
+
+        const refUrl = await gitService.createRepo({repo_request, access_token});
+        if (!refUrl) {
+            return res.sendStatus(500);
+        }
+
+        res.status(200);
+        return res.json({ref: refUrl});
     } catch (err) {
         console.log(err);
-        res.status(500);
+        return res.sendStatus(500);
     }
+
     return res.send();
 }
 
