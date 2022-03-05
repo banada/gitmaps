@@ -59,6 +59,34 @@ const getUsernameForAuthenticatedUser = async () => {
 }
 
 /*
+ * Create the repo under the authenticated user
+ * 
+ * @param {object} repo_request
+ * @param {string} access_token 
+ * @return {object} The newly created ref url.
+ */
+const createRepo = async ({repo_request, access_token}) => {
+    try {
+        const auth = access_token ? `token ${access_token}`: '';
+        const header = {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
+        };
+        const url = `${GITHUB_URL}/user/repos`;
+        const response = await axios.post(url, repo_request, header);
+        console.log(response);
+
+        return response?.data?.url;
+    }
+    catch (err) {
+        console.log(`Error creating new repo: ${err})`);
+        throw err;
+    }
+}
+
+/*
  * Fork the repo under the authenticated user
  * 
  * @param {string} owner
@@ -112,7 +140,6 @@ const isRepoPublic = async ({owner, repo, access_token}) => {
         }
     } catch (err) {
         console.log(`Error checking access rights: ${err}`);
-        console.log(err);
     }
 
     return result;
@@ -464,6 +491,7 @@ const checkContributor = async ({owner, repo, user, access_token}) => {
 
 const gitService = {
     getAuthenticatedUser,
+    createRepo,
     forkRepo,
     canAccessRepo,
     isRepoPublic,

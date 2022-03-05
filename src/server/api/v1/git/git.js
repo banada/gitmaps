@@ -10,15 +10,16 @@ git.post('/repo', async (req, res, next) => {
     return await gitController.createRepo(req, res, next);
 });
 
-/**
- *
- */
 git.get('/', async (req, res, next) => {
     return await gitController.gitCommit(req, res, next);
 });
 
 git.get('/user', async (req, res, next) => {
     return await gitController.getAuthenticatedUser(req, res, next);
+});
+
+git.post('/user/repos', async (req, res, next) => {
+    return await gitController.createRepo(req, res, next);
 });
 
 git.get('/repos/:owner/:repo/branches', async (req, res, next) => {

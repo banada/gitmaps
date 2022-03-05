@@ -22,13 +22,17 @@
 
     - [x] Make it pretty
 
+    - [ ] When deleting groups, leave children alone.
+    
+    - [ ] When moving child outside of group, delete wrapper if no data exist.
+
 - [ ] Github Integration
 
     - [ ] GitHub authentication (Lawrence)
 
     - [ ] Users that are part of the project can make changes
 
-    - [ ] Users can fork
+    - [x] Users can fork
 
     - [x] Visualize diffs
 
