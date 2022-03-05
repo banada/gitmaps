@@ -181,6 +181,39 @@ const getBranches = async (req, res, next) => {
     }
 }
 
+const createBranch = async (req, res, next) => {
+    try {
+        // TODO validate
+        const owner = req.params.owner;
+        const repo = req.params.repo;
+        const baseBranch = req.body.baseBranch;
+        const newBranch = req.body.newBranch;
+
+        const access_token = getAccessToken(req.session);
+        if (!access_token) {
+            return res.sendStatus(401);
+        }
+
+        const branchSHA = await gitService.createBranch({
+            owner,
+            repo,
+            baseBranch,
+            newBranch,
+            access_token
+        });
+
+        if (!branchSHA) {
+            return res.sendStatus(500);
+        }
+
+        res.status(200);
+        return res.json({branchSHA});
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+}
+
 const commitAndPush = async (req, res, next) => {
     try {
         const owner = req.body.owner;
@@ -244,6 +277,7 @@ const gitController = {
     gitCommit,
     getAuthenticatedUser,
     getBranches,
+    createBranch,
     commitAndPush,
     forkRepo
 }

@@ -167,13 +167,47 @@ const branchExists = async (branch, repo, owner) => {
 }
 
 /*
- * Creates a branch off of master
+ * Creates a new branch off of another
  * 
- * @param {string} branch 
- * @param {string} owner
- * @param {string} repo 
+ * @param  {string} owner        Repo owner.
+ * @param  {string} repo         Repository name.
+ * @param  {string} baseBranch   Branch to branch off of.
+ * @param  {string} newBranch    Branch name to create.
  * @return {string} Returns SHA1 of the newly created branch.
  */
+
+const createBranch = async ({owner, repo, baseBranch, newBranch, access_token}) => {
+    try {
+        const masterData = await getRef({
+            owner,
+            repo,
+            branch: baseBranch,
+            access_token
+        });
+        const masterSHA = masterData.data.object.sha;
+
+        // Create a new branch
+        const createNewBranchData = await createRef({
+            owner,
+            repo,
+            branch: newBranch,
+            sha: masterSHA,
+            access_token
+        });
+
+        const newBranchData = await getRef({
+            owner,
+            repo,
+            branch: newBranch,
+            access_token
+        });
+
+        return newBranchData?.data?.object?.sha;
+    } catch (err) {
+        throw err;
+    }
+}
+/*
 const createBranch = async (branch, repo, owner) => {
     let branchSHA;
     try {
@@ -211,6 +245,7 @@ const createBranch = async (branch, repo, owner) => {
 
     return branchSHA;
 }
+*/
 
 /*
  * Create and send the commit
@@ -410,6 +445,27 @@ const getRef = async ({owner, repo, branch, access_token}) => {
     }
 }
 
+const createRef = async ({owner, repo, branch, sha, access_token}) => {
+    try {
+        const refUrl = `${GITHUB_URL}/repos/${owner}/${repo}/git/refs`;
+        const auth = access_token ? `token ${access_token}`: '';
+        const refData = await axios.post(refUrl, {
+            ref: `refs/heads/${branch}`,
+            sha
+        },
+        {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': auth
+            }
+        });
+
+        return refData;
+    } catch (err) {
+        throw err;
+    }
+}
+
 const gitService = {
     getAuthenticatedUser,
     forkRepo,
@@ -420,7 +476,8 @@ const gitService = {
     getPullRequest,
     getPullRequestFiles,
     getBranch,
-    getBranches
+    getBranches,
+    createBranch
 }
 
 export default gitService;

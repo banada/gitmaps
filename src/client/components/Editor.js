@@ -11,9 +11,9 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
-import ForkModal from './ForkModal';
-import BranchModal from './BranchModal';
-import CommitModal from './CommitModal';
+import ForkModal from './modals/ForkModal';
+import BranchModal from './modals/BranchModal';
+import CommitModal from './modals/CommitModal';
 import Sidebar from './Sidebar';
 import styles from './cyto.css';
 
@@ -366,18 +366,34 @@ class Editor extends React.Component {
         });
     }
 
+    newBranchAndCommit = async ({baseBranch, newBranch}) => {
+        try {
+            const url = `git/repos/${this.state.owner}/${this.state.repo}/branches`;
+            const {status, data} = await fetchData('POST', url, { baseBranch, newBranch });
+            if (status === 200) {
+                toast.success(`Created branch ${newBranch}`);
+                this.selectBranch(newBranch);
+            } else {
+                toast.error('There was a problem creating the branch.');
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     commitAndPush = async (message) => {
         const url = `git/save`;
         const {status, data} = await fetchData('POST', url, {
             owner: this.state.owner,
             repo: this.state.repo,
-            branch: this.state.branch,
+            branch: this.state.selectedBranch,
             path: this.state.path,
             content: this.exportJSON(),
             message
         });
         if (status === 200) {
             toast.success('Saved!');
+            this.closeModals();
         }
     }
 
@@ -443,6 +459,7 @@ class Editor extends React.Component {
                 }
                 {(this.state.forkModal) &&
                     <ForkModal
+                        onClose={this.closeModals}
                     />
                 }
                 {(this.state.branchModal) &&
@@ -450,6 +467,7 @@ class Editor extends React.Component {
                         branches={this.state.branches}
                         onSelect={this.selectBranch}
                         onClose={this.closeModals}
+                        onNewBranch={this.newBranchAndCommit}
                     />
                 }
                 {(this.state.commitModal) &&
@@ -460,7 +478,7 @@ class Editor extends React.Component {
                 }
                 <ToastContainer
                     position="bottom-center"
-                    autoClose={1000}
+                    autoClose={2000}
                     hideProgressBar
                     newestOntop
                 />
