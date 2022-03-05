@@ -12,6 +12,8 @@ import styles from './cyto.css';
 
 const GITHUB_API = 'https://api.github.com';
 const GITMAP_EXT = '.json';
+const URL_OWNER_IDX = 3;
+const URL_BRANCH_IDX = 6;
 
 // Handle is shared by all nodes
 const handleDiv = document.createElement('div');
@@ -46,12 +48,14 @@ class PullRequestPage extends React.Component {
 
             const base = JSON.parse(res.data.base.data);
             const head = JSON.parse(res.data.head.data);
+            const blobUrl = res.data.blobUrl;
 
             this.setState({
                 branches: {
                     left: res.data.base.ref,
                     right: res.data.head.ref
-                }
+                },
+                blobUrl
             });
 
             this.viewDiff(base, head);
@@ -126,6 +130,19 @@ class PullRequestPage extends React.Component {
 
     closeSidebar = () => this.setState({detailNode: null});
 
+    redirectToEdit = () => {
+        const blobUrl = this.state.blobUrl;
+        let splitUrl = blobUrl.split('/');
+        const branchInfo = this.state.branches[this.state.currentGraph].split(':');
+        const owner = branchInfo[0];
+        const branch = branchInfo[1];
+        splitUrl[URL_OWNER_IDX] = owner;
+        splitUrl[URL_BRANCH_IDX] = branch;
+        splitUrl = splitUrl.slice(3);
+
+        window.location = `${window.location.origin}/${splitUrl.join('/')}`;
+    }
+
     render() {
         return (
             <>
@@ -137,7 +154,7 @@ class PullRequestPage extends React.Component {
                         <div className="p-2">
                             <button
                                 className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
-                                onClick={evt => alert('TODO')}
+                                onClick={this.redirectToEdit}
                             >
                                 Edit Graph
                             </button>
