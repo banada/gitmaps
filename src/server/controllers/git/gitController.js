@@ -256,10 +256,10 @@ const forkRepo = async(req, res, next) => {
             return res.sendStatus(401);
         }
 
-        const repo = req.body.repo;
-        const owner = req.body.owner;
+        const owner = req.params.owner;
+        const repo = req.params.repo;
 
-        const refUrl = await gitService.forkRepo(owner, repo, access_token);
+        const refUrl = await gitService.forkRepo({owner, repo, access_token});
         if (!refUrl) {
             return res.sendStatus(500);
         }
