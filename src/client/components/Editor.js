@@ -17,6 +17,7 @@ import ForkModal from './modals/ForkModal';
 import RepoModal from './modals/RepoModal';
 import BranchModal from './modals/BranchModal';
 import CommitModal from './modals/CommitModal';
+import ContributeModal from './modals/ContributeModal';
 import Sidebar from './Sidebar';
 import styles from './cyto.css';
 
@@ -62,6 +63,7 @@ class Editor extends React.Component {
                 path
             }, async () => {
                 await this.getGraphFromBranch();
+                await this.getCryptoFromBranch();
             });
         // New
         } else {
@@ -78,7 +80,8 @@ class Editor extends React.Component {
             if (this.props.match.path === Paths.New) {
                 return this.setState({
                     user: data.user,
-                    instructionsModal: true
+                    instructionsModal: true,
+                    newProject: true
                 }, () => {
                     return this.setup();
                 })
@@ -130,6 +133,31 @@ class Editor extends React.Component {
             const graph = JSON.parse(data.data);
 
             this.setup(graph);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    getCryptoFromBranch = async () => {
+        try {
+            const url = `files/${this.state.owner}/${this.state.repo}/${this.state.branch}/${this.state.path}`;
+            let splitUrl = url.split('/');
+            // Remove file from url
+            splitUrl.pop();
+            splitUrl.push('btc.txt');
+            const btcUrl = splitUrl.join('/');
+            const {status, data} = await fetchData('GET', btcUrl);
+            if (status === 200) {
+                this.setState({
+                    crypto: {
+                        // TODO allow other currencies
+                        type: 'btc',
+                        address: data.data.trim(),
+                        // TODO unhardcode
+                        amount: 0.0005
+                    }
+                });
+            }
         } catch (err) {
             console.log(err);
         }
@@ -490,13 +518,18 @@ class Editor extends React.Component {
         }
     }
 
+    openContributeModal = () => {
+        this.setState({ contributeModal: true });
+    }
+
     closeModals = () => {
         this.setState({
             forkModal: false,
             repoModal: false,
             branchModal: false,
             commitModal: false,
-            instructionsModal: false
+            instructionsModal: false,
+            contributeModal: false
         });
     }
 
@@ -523,15 +556,28 @@ class Editor extends React.Component {
                                     </div>
                                 }
                                 {(!this.state.error) &&
-                                    <div className="p-2">
-                                        <button
-                                            className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
-                                            style={{ borderColor: '#85d1ff' }}
-                                            onClick={this.onExportJSON}
-                                        >
-                                            Export JSON
-                                        </button>
-                                    </div>
+                                    <>
+                                        <div className="p-2">
+                                            <button
+                                                className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                                style={{ borderColor: '#85d1ff' }}
+                                                onClick={this.onExportJSON}
+                                            >
+                                                Export JSON
+                                            </button>
+                                        </div>
+                                        {((!this.state.newProject) && (this.state.crypto)) &&
+                                            <div className="p-2">
+                                                <button
+                                                    className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                                    style={{ borderColor: '#85d1ff' }}
+                                                    onClick={this.openContributeModal}
+                                                >
+                                                    Contribute BTC
+                                                </button>
+                                            </div>
+                                        }
+                                    </>
                                 }
                             </>
                         }
@@ -633,6 +679,16 @@ class Editor extends React.Component {
                 {(this.state.instructionsModal) &&
                     <InstructionsModal
                         onClose={this.closeModals}
+                    />
+                }
+                {(this.state.contributeModal) &&
+                    <ContributeModal
+                        onClose={this.closeModals}
+                        type={this.state.crypto?.type}
+                        address={this.state.crypto?.address}
+                        amount={this.state.crypto?.amount}
+                        owner={this.state.owner}
+                        repo={this.state.repo}
                     />
                 }
                 <div className="absolute z-10 flex justify-between w-full bottom-0">
