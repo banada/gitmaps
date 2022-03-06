@@ -469,9 +469,23 @@ class Editor extends React.Component {
         }
     }
 
-    createRepo = async () => {
+    createRepo = async (repo, visibility) => {
         try {
-            alert('TODO: Create repo')
+            const repo = {
+                'name': repo,
+                'isPrivate': visibility === 'private' ? true : false,
+            };
+            const url = 'git/user/repos';
+            const {status, data} = await fetchData('POST', url, repo);
+            if (status === 200) {
+                this.setState({
+                    repoModal: false,
+                    owner: this.state.user,
+                    hasAccess: true
+                }, async () => {
+                    await this.startSaveFlow();
+                });
+            }
         } catch (err) {
             throw err;
         }
