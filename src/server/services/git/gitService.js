@@ -63,7 +63,7 @@ const getUsernameForAuthenticatedUser = async () => {
  * 
  * @param {object} data 
  * @param {string} access_token 
- * @return {string} The resource endpoint for the newly created repo (e.g. "[owner]/[repo]")
+ * @return {object} Object containing relevant git data
  */
 const createRepo = async (data, access_token) => {
     try {
@@ -77,7 +77,11 @@ const createRepo = async (data, access_token) => {
         const url = `${GITHUB_URL}/user/repos`;
         const response = await axios.post(url, data, header);
 
-        return response?.data?.full_name;
+        return {
+            'owner': response.data.owner.login,
+            'name': response.data.name,
+            'branch': response.data.default_branch,
+        };
     }
     catch (err) {
         throw err;
@@ -240,12 +244,13 @@ const createBranch = async ({owner, repo, baseBranch, newBranch, access_token}) 
 }
 
 /*
- * Create and send the commit
+ * Create and send the commit.
  * 
  * @param {string} branch 
  * @param {string} owner
  * @param {string} repo 
  * @return {string} Returns SHA1 of the newly created branch.
+ *
  */
 const commitBranch = async ({owner, repo, branch, path, message, content, access_token}) => {
     try {
@@ -281,6 +286,10 @@ const commitBranch = async ({owner, repo, branch, path, message, content, access
                 }
             }
         );
+
+        // TODO: There might be small delays in between Github API calls where subsequent API calls are out of date.
+        // Either add static waits between each call, or check and retry to verify changes before making subsequent calls.
+
         // Commit the changes
         const commitUrl = `${GITHUB_URL}/repos/${owner}/${repo}/git/commits`;
         const commitData = await axios.post(commitUrl,

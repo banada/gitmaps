@@ -30,8 +30,8 @@ const createRepo = async (req, res, next) => {
             'auto_init': true,
         };
 
-        const fullName = await gitService.createRepo(repoRequest, access_token);
-        if (!fullName) {
+        const repoResponse = await gitService.createRepo(repoRequest, access_token);
+        if (!repoResponse) {
             return res.sendStatus(500);
         }
 
@@ -39,11 +39,9 @@ const createRepo = async (req, res, next) => {
         const content = req.body.content;
         const message = 'Saving initial map';
         const path = DEFAULT_GITMAP_PATH;
-        const branch = DEFAULT_BRANCH;
-
-        const splitFullName = fullName.split('/');
-        const repo = splitFullName[1];
-        const owner = splitFullName[0];
+        const branch = repoResponse.branch;
+        const repo = repoResponse.name;
+        const owner = repoResponse.owner;
 
         const commit = await gitService.commitBranch({
             owner,
