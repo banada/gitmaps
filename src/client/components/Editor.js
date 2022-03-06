@@ -471,6 +471,14 @@ class Editor extends React.Component {
     }
 
     createRepo = async (repo) => {
+        const content = this.exportJSON();
+        if (!content) {
+            toast.error('Unable to export map.');
+            return;
+        } else {
+            repo.content = content;
+        }
+
         const url = 'git/user/repos';
         const {status, data} = await fetchData('POST', url, repo);
 
@@ -562,7 +570,6 @@ class Editor extends React.Component {
                     <RepoModal
                         onSelect={this.createRepo}
                         onClose={this.closeModals}
-                        onGetContent={this.exportJSON}
                     />
                 }
                 {(this.state.branchModal) &&

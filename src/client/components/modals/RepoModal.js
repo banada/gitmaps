@@ -15,15 +15,12 @@ class RepoModal extends React.Component {
     }
 
     onSubmit = async (evt) => {
-        const content = this.props.onGetContent();
         const repo = this.newRepo.current.value;
         const visibility = this.visibility.current.value;
         if (repo === '') {
             toast.error('Please choose a name for your repository.');
-        } else if (!content) {
-            toast.error('There was an error exporting the map.');
-        } else {
-            this.props.onSelect({repo, visibility, content});
+        }  else {
+            this.props.onSelect({repo, visibility});
         }
     }
 

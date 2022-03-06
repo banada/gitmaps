@@ -30,8 +30,6 @@
 
 - [ ] Github Integration
 
-    - [ ] GitHub authentication (Lawrence)
-
     - [ ] Users that are part of the project can make changes
 
     - [x] Users can fork
@@ -54,3 +52,12 @@
 
 - [ ] Add instructions / tips (Tippy library?)
 
+## Bugs
+
+- [ ] Client
+
+    - [ ] Cannot export JSON if graph has 0 edges
+
+- [ ] Server
+
+    - [ ] Subsequent API calls can result in 409 HTTP Errors (see commitAndPush) 
