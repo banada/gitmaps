@@ -61,11 +61,11 @@ const getUsernameForAuthenticatedUser = async () => {
 /*
  * Create the repo under the authenticated user
  * 
- * @param {object} repo_request
+ * @param {object} data 
  * @param {string} access_token 
- * @return {object} The newly created ref url.
+ * @return {string} The resource endpoint for the newly created repo (e.g. "[owner]/[repo]")
  */
-const createRepo = async ({repo_request, access_token}) => {
+const createRepo = async (data, access_token) => {
     try {
         const auth = access_token ? `token ${access_token}`: '';
         const header = {
@@ -75,13 +75,11 @@ const createRepo = async ({repo_request, access_token}) => {
             }
         };
         const url = `${GITHUB_URL}/user/repos`;
-        const response = await axios.post(url, repo_request, header);
-        console.log(response);
+        const response = await axios.post(url, data, header);
 
-        return response?.data?.url;
+        return response?.data?.full_name;
     }
     catch (err) {
-        console.log(`Error creating new repo: ${err})`);
         throw err;
     }
 }
@@ -253,7 +251,6 @@ const commitBranch = async ({owner, repo, branch, path, message, content, access
     try {
         // Get user
         const user = await getAuthenticatedUser({access_token});
-        console.log(user);
 
         // Get branch ref
         const branchData = await getBranch({owner, repo, branch, access_token});
@@ -268,6 +265,7 @@ const commitBranch = async ({owner, repo, branch, path, message, content, access
                 content
             }
         ]
+
         // Create tree
         const treeUrl = `${GITHUB_URL}/repos/${owner}/${repo}/git/trees`;
         const auth = access_token ? `token ${access_token}`: '';
@@ -322,8 +320,7 @@ const commitBranch = async ({owner, repo, branch, path, message, content, access
 
         return push?.data?.url;
     } catch (err) {
-        console.log(err);
-        console.log(`Error: ${err}`);
+        console.log(`[CommitBranch] ERROR: ${err}`);
         throw err;
     }
 }
