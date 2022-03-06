@@ -26,6 +26,8 @@
     
     - [ ] When moving child outside of group, delete wrapper if no data exist.
 
+    - [ ] Saving to a branch needs to redirect to that branch if it's not the current
+
 - [ ] Github Integration
 
     - [ ] GitHub authentication (Lawrence)

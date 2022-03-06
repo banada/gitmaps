@@ -5,38 +5,67 @@ import { getAccessToken } from '@serverutils/utils';
 import { isUn } from '../../../utils/utils';
 import test from './test.json';
 
+const DEFAULT_BRANCH = 'main';
+const DEFAULT_GITMAP_PATH  = 'gitmap.json';
+
 const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN
 });
 
 /**
- * Creates a repository under the user account.
+ * Creates a repository, initializes, and pushes the initial content for the authenticated user.
  */
 const createRepo = async (req, res, next) => {
     try {
+        // Auth
         const access_token = getAccessToken(req.session);
         if (!access_token) {
             return res.sendStatus(401);
         }
 
-        const repo_request = {
-            'name': req.body.name,
-            'private': req.body.isPrivate,
+        // Create repo
+        const repoRequest = {
+            'name': req.body.repo,
+            'private': req.body.visibility === 'private' ? true : false,
+            'auto_init': true,
         };
 
-        const refUrl = await gitService.createRepo({repo_request, access_token});
-        if (!refUrl) {
+        const fullName = await gitService.createRepo(repoRequest, access_token);
+        if (!fullName) {
             return res.sendStatus(500);
         }
 
+        // Push initial content to the default main branch 
+        const content = req.body.content;
+        const message = 'Saving initial map';
+        const path = DEFAULT_GITMAP_PATH;
+        const branch = DEFAULT_BRANCH;
+
+        const splitFullName = fullName.split('/');
+        const repo = splitFullName[1];
+        const owner = splitFullName[0];
+
+        const commit = await gitService.commitBranch({
+            owner,
+            repo,
+            branch,
+            path,
+            message,
+            content,
+            access_token
+        });
+
+        if (!commit) {
+            return res.sendStatus(500);
+        }
+
+        const filePath = `${owner}/${repo}/blob/${branch}/${path}`;
         res.status(200);
-        return res.json({ref: refUrl});
+        return res.json({filePath});
     } catch (err) {
         console.log(err);
         return res.sendStatus(500);
     }
-
-    return res.send();
 }
 
 const gitCommit = async (req, res, next) => {

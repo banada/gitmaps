@@ -323,6 +323,7 @@ class Editor extends React.Component {
                 classes: n.classes
             }
         });
+        // Is there a bug here for 0 edges?
         const edges = elements.edges.map((e) => {
             return {
                 data: e.data,
@@ -469,25 +470,15 @@ class Editor extends React.Component {
         }
     }
 
-    createRepo = async (repo, visibility) => {
-        try {
-            const repo = {
-                'name': repo,
-                'isPrivate': visibility === 'private' ? true : false,
-            };
-            const url = 'git/user/repos';
-            const {status, data} = await fetchData('POST', url, repo);
-            if (status === 200) {
-                this.setState({
-                    repoModal: false,
-                    owner: this.state.user,
-                    hasAccess: true
-                }, async () => {
-                    await this.startSaveFlow();
-                });
-            }
-        } catch (err) {
-            throw err;
+    createRepo = async (repo) => {
+        const url = 'git/user/repos';
+        const {status, data} = await fetchData('POST', url, repo);
+
+        if (status === 200) {
+            const path = data.filePath;
+            window.location = path;
+        } else {
+            toast.error('Unable to save map.');
         }
     }
 
@@ -571,6 +562,7 @@ class Editor extends React.Component {
                     <RepoModal
                         onSelect={this.createRepo}
                         onClose={this.closeModals}
+                        onGetContent={this.exportJSON}
                     />
                 }
                 {(this.state.branchModal) &&
