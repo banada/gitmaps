@@ -343,7 +343,7 @@ class Editor extends React.Component {
     exportJSON = () => {
         const elements = this.state.cytoscape.json().elements;
         // Filter out junk
-        const nodes = elements.nodes.map((n) => {
+        const nodes = elements.nodes?.map((n) => {
             return {
                 data: n.data,
                 position: n.position,
@@ -352,7 +352,7 @@ class Editor extends React.Component {
             }
         });
         // Is there a bug here for 0 edges?
-        const edges = elements.edges.map((e) => {
+        const edges = elements.edges?.map((e) => {
             return {
                 data: e.data,
                 position: e.position,
