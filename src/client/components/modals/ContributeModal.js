@@ -8,16 +8,6 @@ class ContributeModal extends React.Component {
         super(props);
     }
 
-    onSubmit = async (evt) => {
-        const repo = this.newRepo.current.value;
-        const visibility = this.visibility.current.value;
-        if (repo === '') {
-            toast.error('Please choose a name for your repository.');
-        } else {
-            this.props.onSelect({repo, visibility});
-        }
-    }
-
     render() {
         const btcStr = `bitcoin:${this.props.address}?amount=${this.props.amount}`;
         const qrImg = qr.imageSync(btcStr);
