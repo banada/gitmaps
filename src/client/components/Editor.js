@@ -351,7 +351,6 @@ class Editor extends React.Component {
                 classes: n.classes
             }
         });
-        // Is there a bug here for 0 edges?
         const edges = elements.edges?.map((e) => {
             return {
                 data: e.data,
