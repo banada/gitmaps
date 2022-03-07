@@ -3,7 +3,6 @@ import { Octokit } from 'octokit';
 import gitService from '@services/git/gitService';
 import { getAccessToken } from '@serverutils/utils';
 import { isUn } from '../../../utils/utils';
-import test from './test.json';
 
 const DEFAULT_BRANCH = 'main';
 const DEFAULT_GITMAP_PATH  = 'gitmap.json';
@@ -63,86 +62,6 @@ const createRepo = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         return res.sendStatus(500);
-    }
-}
-
-const gitCommit = async (req, res, next) => {
-    try {
-        const result = await octokit.rest.users.getAuthenticated();
-        console.log(`Hello ${result.data.login}`);
-        const username = result.data.login;
-
-        const master = await octokit.rest.git.getRef({
-            owner: username,
-            repo: 'graph-test',
-            ref: 'heads/master'
-        });
-        console.log(master.data);
-
-        // Branch off of master
-        const newRefResult = await octokit.rest.git.createRef({
-            owner: username,
-            repo: 'graph-test', // Parameterize this using the original repo
-            ref: 'refs/heads/newbranch6', // Have user pass in a branch
-            sha: master.data.object.sha
-        });
-
-        // Get branch info
-        const branch = await octokit.rest.git.getRef({
-            owner: username,
-            repo: 'graph-test',
-            ref: 'heads/newbranch6'
-        });
-        console.log(branch);
-        const commitSHA = branch.data.object.sha;
-
-        // Create the file to commit
-        const files = [
-            {
-                mode: '100644',
-                path: 'gitmap.json',
-                content: JSON.stringify(test)
-            }
-        ]
-
-        // Update the index
-        const tree = await octokit.rest.git.createTree({
-            owner: username,
-            repo: 'graph-test',
-            tree: files,
-            base_tree: commitSHA
-        });
-        console.log(tree);
-
-        // Commit the changes
-        const newCommit = await octokit.rest.git.createCommit({
-            owner: username,
-            repo: 'graph-test',
-            author: {
-                name: 'Nathaniel Chen',
-                email: 'nathaniel@chengen.co'
-            },
-            tree: tree.data.sha,
-            message: 'Added something!',
-            parents: [commitSHA]
-        });
-        console.log(newCommit);
-
-        // Pushes the commit
-        const pushRes = await octokit.rest.git.updateRef({
-            owner: username,
-            repo: 'graph-test',
-            ref: 'heads/newbranch6',
-            sha: newCommit.data.sha
-        });
-        console.log(pushRes);
-
-        res.sendStatus(200);
-
-    } catch (err) {
-        console.log(err);
-        res.status(500);
-        return res.send();
     }
 }
 
@@ -327,7 +246,6 @@ const checkAccess = async (req, res, next) => {
 
 const gitController = {
     createRepo,
-    gitCommit,
     getAuthenticatedUser,
     getBranches,
     createBranch,
