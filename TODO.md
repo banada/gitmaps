@@ -28,9 +28,9 @@
 
     - [ ] Saving to a branch needs to redirect to that branch if it's not the current
 
-- [ ] Github Integration
+- [x] Github Integration
 
-    - [ ] Users that are part of the project can make changes
+    - [x] Users that are part of the project can make changes
 
     - [x] Users can fork
 
@@ -42,7 +42,7 @@
 
     - [ ] DOT (optional)
 
-- [ ] Pull Request Page
+- [x] Pull Request Page
 
     - [x] Get pull request data
 
@@ -50,7 +50,7 @@
 
     - [x] Display branch name
 
-- [ ] Add instructions / tips (Tippy library?)
+- [x] Add instructions / tips (Tippy library?)
 
 ## Bugs
 
