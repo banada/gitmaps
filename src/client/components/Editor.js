@@ -82,6 +82,7 @@ class Editor extends React.Component {
                 const branches = await this.getBranches();
                 this.setState({
                     branchModal: true,
+                    modalOpen: true,
                     branches
                 });
             });
@@ -103,6 +104,7 @@ class Editor extends React.Component {
                 return this.setState({
                     user: data.user,
                     instructionsModal: true,
+                    modalOpen: true,
                     newProject: true
                 }, () => {
                     return this.setup();
@@ -149,7 +151,8 @@ class Editor extends React.Component {
                         });
                     } else {
                         this.setState({
-                            instructionsModal: true
+                            instructionsModal: true,
+                            modalOpen: true
                         });
                     }
                 } else {
@@ -313,7 +316,7 @@ class Editor extends React.Component {
 
         document.addEventListener('keydown', (evt) => {
             // Delete a node
-            if (evt.key === 'Delete') {
+            if ((evt.key === 'Delete') && (!this.state.modalOpen) && (!this.state.detailNode)) {
                 const node = this.state.selected.first();
                 const id = node.data().id;
                 const selector = `${this.state.selectedType}[id = "${id}"]`;
@@ -442,7 +445,8 @@ class Editor extends React.Component {
             if (!this.state.hasAccess) {
                 // Ask to fork
                 return this.setState({
-                    forkModal: true
+                    forkModal: true,
+                    modalOpen: true
                 });
             }
             // Get branches
@@ -450,13 +454,15 @@ class Editor extends React.Component {
             this.setState({
                 saveFlow: true,
                 branchModal: true,
+                modalOpen: true,
                 branches
             });
 
         } else {
             this.setState({
                 saveFlow: true,
-                repoModal: true
+                repoModal: true,
+                modalOpen: true
             });
         }
     }
@@ -544,6 +550,7 @@ class Editor extends React.Component {
             if (status === 200) {
                 this.setState({
                     forkModal: false,
+                    modalOpen: false,
                     owner: this.state.user,
                     hasAccess: true
                 }, async () => {
@@ -583,7 +590,10 @@ class Editor extends React.Component {
     }
 
     openContributeModal = () => {
-        this.setState({ contributeModal: true });
+        this.setState({
+            contributeModal: true,
+            modalOpen: true
+        });
     }
 
     closeModals = () => {
@@ -593,7 +603,8 @@ class Editor extends React.Component {
             branchModal: false,
             commitModal: false,
             instructionsModal: false,
-            contributeModal: false
+            contributeModal: false,
+            modalOpen: false
         });
     }
 
