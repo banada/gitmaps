@@ -480,6 +480,7 @@ class Editor extends React.Component {
             selectedBranch: branch,
             branch,
             branchModal: false,
+            modalOpen: false,
             // Default path for initializing new
             path: this.state.path || 'gitmap.json'
         }, async () => {
