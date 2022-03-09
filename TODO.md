@@ -22,7 +22,7 @@
 
     - [x] Make it pretty
 
-    - [ ] When deleting groups, leave children alone.
+    - [x] When deleting groups, leave children alone.
     
     - [ ] When moving child outside of group, delete wrapper if no data exist.
 

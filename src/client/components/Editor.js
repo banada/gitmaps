@@ -318,6 +318,11 @@ class Editor extends React.Component {
             // Delete a node
             if ((evt.key === 'Delete') && (!this.state.modalOpen) && (!this.state.detailNode)) {
                 const node = this.state.selected.first();
+
+                // Children of node to be deleted are moved to the parent, if one exists. This allows for deletion of
+                // parent node without losing children.
+                node.children().move({parent: node.parent().id() ?? null});
+
                 const id = node.data().id;
                 const selector = `${this.state.selectedType}[id = "${id}"]`;
                 this.state.cytoscape.remove(selector);
