@@ -353,9 +353,7 @@ class Editor extends React.Component {
     createNode = (position) => {
         const newNode = this.state.cytoscape.add({
             group: 'nodes',
-            data: {
-                name: 'New node'
-            },
+            data: {},
             position: {
                 x: position.x,
                 y: position.y

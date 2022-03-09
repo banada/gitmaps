@@ -55,7 +55,7 @@ class Sidebar extends React.Component {
                                 <div
                                     className="w-full"
                                 >
-                                    {this.props.node?.name || ''}
+                                    {this.props.node?.name || 'New node'}
                                 </div>
                             </div>
                         </div>
