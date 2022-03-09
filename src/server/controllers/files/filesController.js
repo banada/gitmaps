@@ -1,7 +1,5 @@
 import axios from 'axios';
 import Base64 from 'js-base64';
-import { Octokit } from 'octokit';
-import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
 
 import { getAccessToken } from '@serverutils/utils';
 import gitService from '@services/git/gitService';
@@ -9,18 +7,9 @@ import { isUn } from '../../../utils/utils';
 
 const GITMAP_EXT = '.json';
 
-const octokit = new Octokit({
-    authStrategy: createOAuthAppAuth,
-    auth: {
-        clientId: process.env.GITHUB_CLIENT_ID,
-        clientSecret: process.env.GITHUB_CLIENT_SECRET
-    }
-});
-
 const readFilesByPullRequest = async (req, res, next) => {
 
     //TODO validate
-
     const owner = req.params.owner;
     const repo = req.params.repo;
     const pull_number = req.params.pr;

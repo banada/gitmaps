@@ -40,13 +40,6 @@ class BranchModal extends React.Component {
             });
         }
 
-        if (this.state.branch === 'master') {
-            const warning = 'Are you sure you want to commit and push to master?';
-            if (!window.confirm(warning)) {
-                return;
-            }
-        }
-
         if (this.state.branch === 'New Branch') {
             // TODO branch select
             return this.setState({
@@ -86,7 +79,7 @@ class BranchModal extends React.Component {
                     </div>
                     {(!this.state.newBranch) &&
                         <>
-                            <p className="text-2xl mt-4">Choose a branch to save to:</p>
+                            <p className="text-2xl mt-4">Choose a branch:</p>
                             <div className="my-4">
                                 <select
                                     className="p-2 rounded cursor-pointer"

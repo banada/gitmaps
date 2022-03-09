@@ -12,6 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Paths } from '../routes';
 import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
+import LoadingSpinner from './LoadingSpinner';
 import InstructionsModal from './modals/InstructionsModal';
 import ForkModal from './modals/ForkModal';
 import RepoModal from './modals/RepoModal';
@@ -44,6 +45,10 @@ class Editor extends React.Component {
         const branch = this.props.match?.params?.branch;
         const path = this.props.match.params[0];
 
+        this.setState({
+            loading: true
+        });
+
         // Authenticate and redirect
         const queryParams = this.props.location?.search;
         if (queryParams) {
@@ -65,10 +70,28 @@ class Editor extends React.Component {
                 await this.getGraphFromBranch();
                 await this.getCryptoFromBranch();
             });
-        // New
+        // New project
+        } else if (repo) {
+            this.setState({
+                owner,
+                repo,
+                branch,
+                path
+            }, async () => {
+                // Get branches
+                const branches = await this.getBranches();
+                this.setState({
+                    branchModal: true,
+                    modalOpen: true,
+                    branches
+                });
+            });
+        // New repo
         } else {
             this.setup();
         }
+
+        this.setState({loading: false});
     }
 
     checkUser = async ({owner, repo}) => {
@@ -81,6 +104,7 @@ class Editor extends React.Component {
                 return this.setState({
                     user: data.user,
                     instructionsModal: true,
+                    modalOpen: true,
                     newProject: true
                 }, () => {
                     return this.setup();
@@ -109,18 +133,28 @@ class Editor extends React.Component {
 
     getGraphFromBranch = async () => {
         try {
-            const url = `files/${this.state.owner}/${this.state.repo}/${this.state.branch}/${this.state.path}`;
+            const branch = this.state.branch || this.state.selectedBranch;
+            const url = `files/${this.state.owner}/${this.state.repo}/${branch}/${this.state.path}`;
             const {status, data} = await fetchData('GET', url);
             if (status !== 200) {
                 if (!this.state.user) {
                     this.setState({
                         error: 'Please log in to view this graph.'
                     });
-                } else if (status === 404){
-                    this.setState({
-                        noAccess: true,
-                        error: "You don't have access to this repository."
-                    });
+                } else if (status === 404) {
+                    // Try to create file
+                    const success = await this.commitAndPush('Created GitMap', 'gitmap.json');
+                    if (!success) {
+                        this.setState({
+                            noAccess: true,
+                            error: "You don't have access to this repository."
+                        });
+                    } else {
+                        this.setState({
+                            instructionsModal: true,
+                            modalOpen: true
+                        });
+                    }
                 } else {
                     this.setState({
                         error: 'There was an error.'
@@ -282,12 +316,18 @@ class Editor extends React.Component {
 
         document.addEventListener('keydown', (evt) => {
             // Delete a node
-            if (evt.key === 'Delete') {
+            if ((evt.key === 'Delete') && (!this.state.modalOpen) && (!this.state.detailNode)) {
                 const node = this.state.selected.first();
                 const id = node.data().id;
                 const selector = `${this.state.selectedType}[id = "${id}"]`;
                 this.state.cytoscape.remove(selector);
                 handleDiv.hidden = true;
+            }
+
+            if ((evt.key === 'Escape') && (this.state.detailNode)) {
+                this.setState({
+                    detailNode: null
+                });
             }
         });
 
@@ -311,15 +351,25 @@ class Editor extends React.Component {
     }
 
     createNode = (position) => {
-        this.state.cytoscape.add({
+        const newNode = this.state.cytoscape.add({
             group: 'nodes',
-            data: {
-                name: 'New node'
-            },
+            data: {},
             position: {
                 x: position.x,
                 y: position.y
             }
+        });
+
+        // Open for editing
+        this.setState({
+            detailNode: newNode.id(),
+            // DANGEROUS - setting Sidebar initial state
+            // from props
+            sidebarMode: 'edit'
+        }, () => {
+            this.setState({
+                sidebarMode: null
+            });
         });
     }
 
@@ -341,9 +391,9 @@ class Editor extends React.Component {
     }
 
     exportJSON = () => {
-        const elements = this.state.cytoscape.json().elements;
+        const elements = this.state.cytoscape?.json().elements;
         // Filter out junk
-        const nodes = elements.nodes?.map((n) => {
+        const nodes = elements?.nodes?.map((n) => {
             return {
                 data: n.data,
                 position: n.position,
@@ -351,7 +401,7 @@ class Editor extends React.Component {
                 classes: n.classes
             }
         });
-        const edges = elements.edges?.map((e) => {
+        const edges = elements?.edges?.map((e) => {
             return {
                 data: e.data,
                 position: e.position,
@@ -360,7 +410,10 @@ class Editor extends React.Component {
             }
         });
 
-        const json = JSON.stringify({nodes, edges});
+        const json = JSON.stringify({
+            nodes: nodes,
+            edges: edges
+        });
 
         return json;
     };
@@ -408,19 +461,24 @@ class Editor extends React.Component {
             if (!this.state.hasAccess) {
                 // Ask to fork
                 return this.setState({
-                    forkModal: true
+                    forkModal: true,
+                    modalOpen: true
                 });
             }
             // Get branches
             const branches = await this.getBranches();
             this.setState({
+                saveFlow: true,
                 branchModal: true,
+                modalOpen: true,
                 branches
             });
 
         } else {
             this.setState({
-                repoModal: true
+                saveFlow: true,
+                repoModal: true,
+                modalOpen: true
             });
         }
     }
@@ -436,8 +494,22 @@ class Editor extends React.Component {
     selectBranch = (branch) => {
         this.setState({
             selectedBranch: branch,
+            branch,
             branchModal: false,
-            commitModal: true
+            modalOpen: false,
+            // Default path for initializing new
+            path: this.state.path || 'gitmap.json'
+        }, async () => {
+            if (this.state.saveFlow) {
+                this.setState({
+                    commitModal: true
+                });
+            // Load branch
+            } else {
+                this.setState({loading: true});
+                await this.getGraphFromBranch();
+                this.setState({loading: false});
+            }
         });
     }
 
@@ -457,6 +529,9 @@ class Editor extends React.Component {
     }
 
     commitAndPush = async (message) => {
+        this.setState({
+            loading: true
+        });
         const url = `git/save`;
         const {status, data} = await fetchData('POST', url, {
             owner: this.state.owner,
@@ -467,7 +542,9 @@ class Editor extends React.Component {
             message
         });
         if (status === 200) {
-            toast.success('Saved!');
+            if (this.state.saveFlow) {
+                toast.success('Saved!');
+            }
             this.closeModals();
             // Redirect to the repo we just forked
             if (this.state.owner !== this.props.match?.params?.owner) {
@@ -476,7 +553,13 @@ class Editor extends React.Component {
                 splitUrl[URL_BRANCH_IDX] = this.state.selectedBranch;
                 window.location = splitUrl.join('/');
             }
+            this.setState({
+                saveFlow: false,
+                loading: false
+            });
+            return true;
         }
+        return false;
     }
 
     forkRepo = async () => {
@@ -486,6 +569,7 @@ class Editor extends React.Component {
             if (status === 200) {
                 this.setState({
                     forkModal: false,
+                    modalOpen: false,
                     owner: this.state.user,
                     hasAccess: true
                 }, async () => {
@@ -498,6 +582,10 @@ class Editor extends React.Component {
     }
 
     createRepo = async (repo) => {
+        this.setState({
+            loading: true
+        });
+
         const content = this.exportJSON();
         if (!content) {
             toast.error('Unable to export map.');
@@ -515,10 +603,16 @@ class Editor extends React.Component {
         } else {
             toast.error('Unable to save map.');
         }
+        this.setState({
+            loading: false
+        });
     }
 
     openContributeModal = () => {
-        this.setState({ contributeModal: true });
+        this.setState({
+            contributeModal: true,
+            modalOpen: true
+        });
     }
 
     closeModals = () => {
@@ -528,7 +622,8 @@ class Editor extends React.Component {
             branchModal: false,
             commitModal: false,
             instructionsModal: false,
-            contributeModal: false
+            contributeModal: false,
+            modalOpen: false
         });
     }
 
@@ -599,6 +694,7 @@ class Editor extends React.Component {
                 {(this.state.detailNode) &&
                     <Sidebar
                         node={this.state.cytoscape.$(`node[id = "${this.state.detailNode}"]`).data()}
+                        initialMode={this.state.sidebarMode}
                         onEdit={this.editNode}
                         onClose={this.closeSidebar}
                     />
@@ -697,6 +793,9 @@ class Editor extends React.Component {
                         </div>
                     }
                 </div>
+                {(this.state.loading) &&
+                    <LoadingSpinner />
+                }
             </>
         );
     }

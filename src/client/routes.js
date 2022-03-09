@@ -34,6 +34,10 @@ const routes = [
         component: Editor
     },
     {
+        path: '/:owner/:repo',
+        component: Editor
+    },
+    {
         path: Paths.Editor,
         exact: true,
         component: Editor

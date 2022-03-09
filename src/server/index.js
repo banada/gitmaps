@@ -55,7 +55,7 @@ httpApp.use('/api/v1/', v1);
 // Static Pages
 httpApp.get('/', (req, res, next) => {
     res.status(200);
-    return res.sendFile(path.resolve('src/client/static/landing.html'));
+    return res.redirect('/new');
 });
 httpApp.get('/robots.txt', (req, res, next) => {
     res.status(200);
