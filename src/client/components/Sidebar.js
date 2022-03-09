@@ -10,7 +10,7 @@ class Sidebar extends React.Component {
         super(props);
 
         this.state = {
-            mode: SidebarMode.View
+            mode: this.props.initialMode || SidebarMode.View
         }
     }
 
@@ -88,6 +88,7 @@ class Sidebar extends React.Component {
                                     value={this.props.node?.name || ''}
                                     type="text"
                                     className="rounded w-full p-2"
+                                    autoFocus
                                 ></input>
                             </div>
                         </div>

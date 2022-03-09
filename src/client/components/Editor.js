@@ -323,6 +323,12 @@ class Editor extends React.Component {
                 this.state.cytoscape.remove(selector);
                 handleDiv.hidden = true;
             }
+
+            if ((evt.key === 'Escape') && (this.state.detailNode)) {
+                this.setState({
+                    detailNode: null
+                });
+            }
         });
 
         this.setState({
@@ -345,7 +351,7 @@ class Editor extends React.Component {
     }
 
     createNode = (position) => {
-        this.state.cytoscape.add({
+        const newNode = this.state.cytoscape.add({
             group: 'nodes',
             data: {
                 name: 'New node'
@@ -354,6 +360,18 @@ class Editor extends React.Component {
                 x: position.x,
                 y: position.y
             }
+        });
+
+        // Open for editing
+        this.setState({
+            detailNode: newNode.id(),
+            // DANGEROUS - setting Sidebar initial state
+            // from props
+            sidebarMode: 'edit'
+        }, () => {
+            this.setState({
+                sidebarMode: null
+            });
         });
     }
 
@@ -678,6 +696,7 @@ class Editor extends React.Component {
                 {(this.state.detailNode) &&
                     <Sidebar
                         node={this.state.cytoscape.$(`node[id = "${this.state.detailNode}"]`).data()}
+                        initialMode={this.state.sidebarMode}
                         onEdit={this.editNode}
                         onClose={this.closeSidebar}
                     />
