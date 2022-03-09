@@ -490,7 +490,9 @@ class Editor extends React.Component {
                 });
             // Load branch
             } else {
+                this.setState({loading: true});
                 await this.getGraphFromBranch();
+                this.setState({loading: false});
             }
         });
     }
