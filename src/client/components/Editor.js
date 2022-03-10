@@ -134,7 +134,13 @@ class Editor extends React.Component {
     getGraphFromBranch = async () => {
         try {
             const branch = this.state.branch || this.state.selectedBranch;
-            const url = `files/${this.state.owner}/${this.state.repo}/${branch}/${this.state.path}`;
+            let url = `files/${this.state.owner}/${this.state.repo}/${branch}`;
+            if (this.state.path) {
+                url += `/${this.state.path}`;
+                console.log(url);
+            } else {
+                url += '/gitmap.json';
+            }
             const {status, data} = await fetchData('GET', url);
             if (status !== 200) {
                 if (!this.state.user) {
@@ -511,9 +517,8 @@ class Editor extends React.Component {
                 });
             // Load branch
             } else {
-                this.setState({loading: true});
-                await this.getGraphFromBranch();
-                this.setState({loading: false});
+                // Redirect to branch page
+                window.location = `${window.location}/${branch}`;
             }
         });
     }
@@ -636,11 +641,11 @@ class Editor extends React.Component {
 
         return (
             <>
-                <div className="absolute z-10 flex justify-between w-full">
+                <div className="absolute z-10 flex justify-between items-center w-full bg-blue-700">
                     <div className="p-2 text-white font-bold text-2xl">
                         GitMaps.com
                     </div>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-center items-center w-1/2">
                         {(this.state.graphLoaded) &&
                             <>
                                 {(this.state.user && !this.state.noAccess) &&
@@ -679,6 +684,13 @@ class Editor extends React.Component {
                                     </>
                                 }
                             </>
+                        }
+                    </div>
+                    <div className="w-1/3 flex justify-center">
+                        {(this.state.repo) &&
+                            <div className="p-2 text-white">
+                                {this.state.owner}/{this.state.repo}/{this.state.branch}
+                            </div>
                         }
                     </div>
                     {/*
@@ -792,11 +804,6 @@ class Editor extends React.Component {
                     />
                 }
                 <div className="absolute z-10 flex justify-between w-full bottom-0">
-                    {(this.state.repo) &&
-                        <div className="p-2 text-white text-2xl">
-                            {this.state.owner}/{this.state.repo}/{this.state.branch}
-                        </div>
-                    }
                 </div>
                 {(this.state.loading) &&
                     <LoadingSpinner />

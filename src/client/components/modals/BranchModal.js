@@ -51,6 +51,12 @@ class BranchModal extends React.Component {
     }
 
     render() {
+        if (!this.props.branches) {
+            return (
+                <></>
+            );
+        }
+
         const branches = this.props.branches.map((b, idx) => {
             return (
                 <option key={idx}>
