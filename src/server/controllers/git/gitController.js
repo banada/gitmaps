@@ -92,9 +92,6 @@ const getBranches = async (req, res, next) => {
         const owner = req.params.owner;
         const repo = req.params.repo;
         const access_token = getAccessToken(req.session);
-        if (!access_token) {
-            return res.sendStatus(401);
-        }
 
         const branches = await gitService.getBranches({
             owner,
