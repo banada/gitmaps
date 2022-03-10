@@ -3,6 +3,7 @@ import '@babel/polyfill';
 
 import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
+import LoadingSpinner from './LoadingSpinner';
 import {
     graphDiffSeparate,
     graphDiffCombined
@@ -31,6 +32,7 @@ class PullRequestPage extends React.Component {
 
     componentDidMount = async () => {
         try {
+            this.setState({loading: true})
             await this.fetchPullRequestFiles();
         } catch (err) {
             throw err;
@@ -55,7 +57,8 @@ class PullRequestPage extends React.Component {
                     left: res.data.base.ref,
                     right: res.data.head.ref
                 },
-                blobUrl
+                blobUrl,
+                loading: false
             });
 
             this.viewDiff(base, head);
@@ -146,14 +149,14 @@ class PullRequestPage extends React.Component {
     render() {
         return (
             <>
-                <div className="absolute z-10 flex justify-between w-full">
+                <div className="absolute z-10 flex justify-between items-center w-full bg-blue-700">
                     <div className="p-2 text-white font-bold text-2xl">
                         GitMaps.com
                     </div>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-center items-center w-1/2">
                         <div className="p-2">
                             <button
-                                className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                className="border border-blue-300 rounded px-2 py-1 cursor-pointer text-white"
                                 onClick={this.redirectToEdit}
                             >
                                 Edit Graph
@@ -161,21 +164,20 @@ class PullRequestPage extends React.Component {
                         </div>
                         <div className="p-2">
                             <button
-                                className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                className="border border-blue-300 rounded px-2 py-1 cursor-pointer text-white"
                                 onClick={this.toggleDiff}
                             >
                                 Toggle Diff
                             </button>
                         </div>
                     </div>
-                    <div className="w-16"></div>
-                </div>
-                <div className="absolute z-10 flex justify-between w-full bottom-0">
-                    {(this.state.branches) &&
-                        <div className="p-2 text-white text-2xl">
-                            {this.state.branches[this.state.currentGraph]}
-                        </div>
-                    }
+                    <div className="p-2 w-1/4 flex justify-center">
+                        {(this.state.branches) &&
+                            <div className="text-white text-lg">
+                                {this.state.branches[this.state.currentGraph]}
+                            </div>
+                        }
+                    </div>
                 </div>
                 <div id="cyto"></div>
                 {(this.state.detailNode) &&
@@ -184,6 +186,9 @@ class PullRequestPage extends React.Component {
                         node={this.state.cytoscape.$(`node[id = "${this.state.detailNode}"]`).data()}
                         onClose={this.closeSidebar}
                     />
+                }
+                {(this.state.loading) &&
+                    <LoadingSpinner />
                 }
             </>
         );
