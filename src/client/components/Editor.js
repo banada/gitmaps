@@ -518,13 +518,14 @@ class Editor extends React.Component {
             // Load branch
             } else {
                 // Redirect to branch page
-                window.location = `${window.location}/${branch}`;
+                window.location = `/${this.state.owner}/${this.state.repo}/${branch}`;
             }
         });
     }
 
     newBranchAndCommit = async ({baseBranch, newBranch}) => {
         try {
+            this.setState({loading: true});
             const url = `git/repos/${this.state.owner}/${this.state.repo}/branches`;
             const {status, data} = await fetchData('POST', url, { baseBranch, newBranch });
             if (status === 200) {
@@ -533,6 +534,7 @@ class Editor extends React.Component {
             } else {
                 toast.error('There was a problem creating the branch.');
             }
+            this.setState({loading: false});
         } catch (err) {
             console.log(err);
         }
@@ -618,6 +620,17 @@ class Editor extends React.Component {
         });
     }
 
+    openBranchModal = async () => {
+        this.setState({loading: true})
+        const branches = await this.getBranches();
+        this.setState({
+            branchModal: true,
+            modalOpen: true,
+            branches,
+            loading: false
+        });
+    }
+
     openContributeModal = () => {
         this.setState({
             contributeModal: true,
@@ -642,7 +655,7 @@ class Editor extends React.Component {
         return (
             <>
                 <div className="absolute z-10 flex justify-between items-center w-full bg-blue-700">
-                    <div className="p-2 text-white font-bold text-2xl">
+                    <div className="p-2 text-white font-bold text-2xl w-1/4">
                         GitMaps.com
                     </div>
                     <div className="flex justify-center items-center w-1/2">
@@ -686,9 +699,12 @@ class Editor extends React.Component {
                             </>
                         }
                     </div>
-                    <div className="w-1/3 flex justify-center">
+                    <div className="w-1/4 flex justify-center select-none">
                         {(this.state.repo) &&
-                            <div className="p-2 text-white">
+                            <div
+                                className="p-2 text-white cursor-pointer"
+                                onClick={this.openBranchModal}
+                            >
                                 {this.state.owner}/{this.state.repo}/{this.state.branch}
                             </div>
                         }
