@@ -32,7 +32,7 @@ class InstructionsModal extends React.Component {
                         Welcome to GitMaps!
                     </p>
                     <p
-                        className="text-lg mt-4 px-4"
+                        className="text-lg mt-4 px-4 underline"
                     >
                         To begin:
                     </p>
@@ -40,6 +40,11 @@ class InstructionsModal extends React.Component {
                         className="text-lg p-4"
                     >
                         Right click on the canvas  >  Add node
+                    </p>
+                    <p
+                        className="text-lg p-4 pt-0"
+                    >
+                        Scroll to zoom in and out
                     </p>
                     <div className="flex justify-center">
                         <div

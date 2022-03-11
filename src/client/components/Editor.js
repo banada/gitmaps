@@ -12,6 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Paths } from '../routes';
 import fetchData from '../fetchData';
 import { setupCytoscape } from './cytoscape';
+import InfoIcon from './icons/InfoIcon';
 import LoadingSpinner from './LoadingSpinner';
 import InstructionsModal from './modals/InstructionsModal';
 import ForkModal from './modals/ForkModal';
@@ -638,6 +639,13 @@ class Editor extends React.Component {
         });
     }
 
+    openInstructionsModal = () => {
+        this.setState({
+            instructionsModal: true,
+            modalOpen: true
+        });
+    }
+
     closeModals = () => {
         this.setState({
             forkModal: false,
@@ -672,6 +680,17 @@ class Editor extends React.Component {
                                         </button>
                                     </div>
                                 }
+                                {(!this.state.user) &&
+                                    <div className="p-2">
+                                        <button
+                                            className="border border-blue-700 rounded px-2 py-1 cursor-pointer text-white"
+                                            style={{ borderColor: '#85d1ff' }}
+                                            onClick={this.loginWithGithub}
+                                        >
+                                            Log in with GitHub
+                                        </button>
+                                    </div>
+                                }
                                 {(!this.state.error) &&
                                     <>
                                         <div className="p-2">
@@ -699,7 +718,13 @@ class Editor extends React.Component {
                             </>
                         }
                     </div>
-                    <div className="w-1/4 flex justify-center select-none">
+                    <div className="w-1/4 flex justify-center items-center select-none">
+                        <div
+                            className="cursor-pointer p-2"
+                            onClick={this.openInstructionsModal}
+                        >
+                            <InfoIcon />
+                        </div>
                         {(this.state.repo) &&
                             <div
                                 className="p-2 text-white cursor-pointer"
