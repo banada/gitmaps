@@ -31,8 +31,9 @@ class ContributeModal extends React.Component {
                             size={6}
                         />
                     </div>
-                    <p className="text-3xl mt-4">Contribute BTC</p>
-                    <div className="mt-4 flex justify-center">
+                    <p className="text-3xl mt-2">Contribute BTC</p>
+                    <p className="text-3xl mt-2 text-red-500">DEMO ONLY - DO NOT SEND</p>
+                    <div className="mt-2 flex justify-center">
                         <img src={qrData} />
                     </div>
                     <p className="text-lg mt-4 mb-8 px-4">Scan to fund this project with Bitcoin. The project maintainer uses these funds to reward people who contribute to this project through pull requests.</p>

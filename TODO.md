@@ -56,7 +56,7 @@
 
 - [ ] Client
 
-    - [ ] Cannot export JSON if graph has 0 edges
+    - [x] Cannot export JSON if graph has 0 edges
 
 - [ ] Server
 
