@@ -250,8 +250,43 @@ class Editor extends React.Component {
             // only select one node at a time
             this.setState({
                 selected: cyto.collection().union(node),
-                selectedType: 'node'
+                selectedType: 'node',
+                selectedNodeOriginalParent: node.parent(),
             });
+        }
+
+        const releaseChildrenFromParent = (node) => {
+            // Children of node to be deleted are moved to the parent, if one exists. This allows for deletion of
+            // parent node without losing children.
+            node.children().move({parent: node.parent().id() ?? null});
+        }
+
+        const deleteGraphEntity = (type, id) => {
+            const selector = `${this.state.selectedType}[id = "${id}"]`;
+            this.state.cytoscape.remove(selector);
+        }
+
+        const shouldParentBeRemoved = (node, originalParent) => {
+            const opId = originalParent.id();
+            const opName = originalParent.data().name;
+            const opDescription = originalParent.data().description;
+            const opDegrees = originalParent.totalDegree();
+            const opChildren = originalParent.children().length;
+
+            const freedNodeNewParentId = node.parent()?.id();
+
+            // Leaving for future debugging purposes
+            //console.log(`Old parent: ${opId}, new parent: ${freedNodeNewParentId}, name: ${opName}, desc: ${opDescription}, deg: ${opDegrees}, children: ${opChildren}`);
+
+            const noMultipleNodeDependecies = opChildren < 2;
+            const hasNoEdges = !opDegrees;
+            const hasNoData = !opName && !opDescription;
+            const nodeMovedToDifferentParent = opId != freedNodeNewParentId;
+
+            return nodeMovedToDifferentParent
+                && hasNoData
+                && hasNoEdges
+                && noMultipleNodeDependecies;
         }
 
         // Click node to select
@@ -259,6 +294,35 @@ class Editor extends React.Component {
             const node = evt.target;
             selectNode(node);
             this.closeSidebar();
+        });
+
+        // When an element is grabbed directly
+        cyto.on('grabon', 'node', (evt) => {
+            const node = evt.target;
+            const originalParent = node.parent();
+            this.setState({
+                grabbedNodeOriginalParent: originalParent.first(),
+            });
+        });
+
+        // When an element is freed directly
+        cyto.on('freeon', 'node', (evt) => {
+            const originalParent = this.state.grabbedNodeOriginalParent;
+            if (originalParent.empty()) {
+                return;
+            }
+
+            // Remove prior compound parent if necessary
+            const node = evt.target;
+            if (shouldParentBeRemoved(node, originalParent)) {
+                releaseChildrenFromParent(originalParent);
+                deleteGraphEntity('node', originalParent.id())
+            }
+
+            // Set the state back to null
+            this.setState({
+                grabbedNodeOriginalParent: null,
+            });
         });
 
         // Click edge to select
@@ -270,7 +334,8 @@ class Editor extends React.Component {
             // only select one edge at a time
             this.setState({
                 selected: cyto.collection().union(edge),
-                selectedType: 'edge'
+                selectedType: 'edge',
+                selectedNodeOriginalParent: null,
             });
         });
 
@@ -325,14 +390,10 @@ class Editor extends React.Component {
             // Delete a node
             if ((evt.key === 'Delete') && (!this.state.modalOpen) && (!this.state.detailNode)) {
                 const node = this.state.selected.first();
-
-                // Children of node to be deleted are moved to the parent, if one exists. This allows for deletion of
-                // parent node without losing children.
-                node.children().move({parent: node.parent().id() ?? null});
+                releaseChildrenFromParent(node);
 
                 const id = node.data().id;
-                const selector = `${this.state.selectedType}[id = "${id}"]`;
-                this.state.cytoscape.remove(selector);
+                deleteGraphEntity(this.state.selectedType, id);
                 handleDiv.hidden = true;
             }
 
