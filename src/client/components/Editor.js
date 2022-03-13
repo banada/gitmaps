@@ -261,7 +261,7 @@ class Editor extends React.Component {
         }
 
         const deleteGraphEntity = (type, id) => {
-            const selector = `${this.state.selectedType}[id = "${id}"]`;
+            const selector = `${type}[id = "${id}"]`;
             this.state.cytoscape.remove(selector);
         }
 
@@ -280,7 +280,7 @@ class Editor extends React.Component {
             const nodeMovedToDifferentParent = opId != freedNodeNewParentId;
 
             // Leaving for future debugging purposes
-            //console.log(`Old parent: ${opId}, new parent: ${freedNodeNewParentId}, name: ${opName}, desc: ${opDescription}, deg: ${opDegrees}, children: ${opChildren}`);
+            // console.log(`Old parent: ${opId}, new parent: ${freedNodeNewParentId}, name: ${opName}, desc: ${opDescription}, deg: ${opDegrees}, children: ${opChildren}`);
 
             return nodeMovedToDifferentParent
                 && hasNoData
@@ -317,7 +317,7 @@ class Editor extends React.Component {
             const node = evt.target;
             if (shouldParentBeRemoved(node, originalParent)) {
                 releaseChildrenFromParent(originalParent);
-                deleteGraphEntity('node', originalParent.id())
+                deleteGraphEntity('node', opId)
             }
 
             // Set the state back to null
