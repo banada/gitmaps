@@ -267,21 +267,21 @@ class Editor extends React.Component {
         }
 
         const shouldParentBeRemoved = (node, originalParent) => {
+            // Setup the data necessary for the check
+            const freedNodeNewParentId = node.parent()?.id();
             const opId = originalParent.id();
             const opName = originalParent.data().name;
             const opDescription = originalParent.data().description;
             const opDegrees = originalParent.totalDegree();
             const opChildren = originalParent.children().length;
 
-            const freedNodeNewParentId = node.parent()?.id();
-
-            // Leaving for future debugging purposes
-            //console.log(`Old parent: ${opId}, new parent: ${freedNodeNewParentId}, name: ${opName}, desc: ${opDescription}, deg: ${opDegrees}, children: ${opChildren}`);
-
             const noMultipleNodeDependecies = opChildren < 2;
             const hasNoEdges = !opDegrees;
             const hasNoData = !opName && !opDescription;
             const nodeMovedToDifferentParent = opId != freedNodeNewParentId;
+
+            // Leaving for future debugging purposes
+            //console.log(`Old parent: ${opId}, new parent: ${freedNodeNewParentId}, name: ${opName}, desc: ${opDescription}, deg: ${opDegrees}, children: ${opChildren}`);
 
             return nodeMovedToDifferentParent
                 && hasNoData
@@ -311,6 +311,8 @@ class Editor extends React.Component {
             if (originalParent.empty()) {
                 return;
             }
+
+            const opId = originalParent.id();
 
             // Remove prior compound parent if necessary
             const node = evt.target;
