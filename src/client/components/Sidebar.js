@@ -5,6 +5,20 @@ const SidebarMode = {
     Edit: 'edit'
 }
 
+const OutlineColors = {
+    Blue: 'outline-blue',
+    Green: 'outline-green',
+    Yellow: 'outline-yellow',
+    Purple: 'outline-purple'
+}
+
+/**
+ *  
+ *  node
+ *  data
+ *  onEdit
+ *  onEditColor
+ */
 class Sidebar extends React.Component {
     constructor(props) {
         super(props);
@@ -33,8 +47,29 @@ class Sidebar extends React.Component {
         return lines;
     }
 
+    getOutlineColorFromClasses = (node) => {
+        console.log(node.classes());
+        for (const prop in OutlineColors) {
+            console.log(prop);
+            if (node.hasClass(OutlineColors[prop])) {
+                console.log(`${prop}!!`);
+                return OutlineColors[prop];
+            }
+        }
+    }
+
+    changeColor = (evt) => {
+        const color = evt.target.value;
+        // Remove all colors
+        for (const prop in OutlineColors) {
+            this.props.node.removeClass(OutlineColors[prop]);
+        }
+        this.props.onChangeColor(color);
+    }
+
     render() {
-        const text = this.renderText(this.props.node?.description);
+        const text = this.renderText(this.props.data?.description);
+        const outlineColor = this.getOutlineColorFromClasses(this.props.node);
 
         return (
             <div id="sidebar" className="absolute z-10 h-full w-1/3 right-0 top-0 shadow-lg px-6">
@@ -55,7 +90,7 @@ class Sidebar extends React.Component {
                                 <div
                                     className="w-full"
                                 >
-                                    {this.props.node?.name || 'New node'}
+                                    {this.props.data?.name || 'New node'}
                                 </div>
                             </div>
                         </div>
@@ -85,7 +120,7 @@ class Sidebar extends React.Component {
                             <div className="flex justify-center items-center mt-2">
                                 <input
                                     onChange={evt => this.props.onEdit && this.props.onEdit(evt, 'name')}
-                                    value={this.props.node?.name || ''}
+                                    value={this.props.data?.name || ''}
                                     type="text"
                                     className="rounded w-full p-2"
                                     autoFocus
@@ -93,11 +128,23 @@ class Sidebar extends React.Component {
                             </div>
                         </div>
                         <div className="mt-4">
+                            <select
+                                className="p-2 rounded cursor-pointer"
+                                onChange={evt => this.changeColor(evt)}
+                                value={outlineColor || OutlineColors.Blue}
+                            >
+                                <option value={OutlineColors.Blue}>Blue</option>
+                                <option value={OutlineColors.Green}>Green</option>
+                                <option value={OutlineColors.Yellow}>Yellow</option>
+                                <option value={OutlineColors.Purple}>Purple</option>
+                            </select>
+                        </div>
+                        <div className="mt-4">
                             <span className="">Notes:</span>
                             <div className="flex justify-center items-center mt-2">
                                 <textarea
                                     onChange={evt => this.props.onEdit && this.props.onEdit(evt, 'description')}
-                                    value={this.props.node?.description || ''}
+                                    value={this.props.data?.description || ''}
                                     className="rounded w-full p-2"
                                 ></textarea>
                             </div>

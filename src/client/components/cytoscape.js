@@ -74,6 +74,30 @@ export function setupCytoscape(graph) {
                     'line-color': '#ff8066',
                     'target-arrow-color': '#ff8066'
                  }
+            },
+            {
+                selector: 'node.outline-green',
+                css: {
+                    'border-color': '#66ff6c'
+                }
+            },
+            {
+                selector: 'node.outline-yellow',
+                css: {
+                    'border-color': '#ffff47'
+                }
+            },
+            {
+                selector: 'node.outline-purple',
+                css: {
+                    'border-color': '#ce5df0'
+                }
+            },
+            {
+                selector: 'node.outline-blue',
+                css: {
+                    'border-color': '#85d1ff',
+                }
             }
         ]
     });
