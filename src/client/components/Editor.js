@@ -459,6 +459,15 @@ class Editor extends React.Component {
         });
     }
 
+    changeColor = (color) => {
+        const node = this.state.cytoscape.$(`node[id = "${this.state.detailNode}"]`); 
+        node.addClass(color);
+        // Force re-render
+        this.setState({
+            cytoscape: this.state.cytoscape
+        });
+    }
+
     closeSidebar = () => this.setState({detailNode: null});
 
     onExportJSON = () => {
@@ -814,9 +823,12 @@ class Editor extends React.Component {
                 <div id="cyto"></div>
                 {(this.state.detailNode) &&
                     <Sidebar
-                        node={this.state.cytoscape.$(`node[id = "${this.state.detailNode}"]`).data()}
+                        node={this.state.cytoscape.$(`node[id = "${this.state.detailNode}"]`)}
+                        data={this.state.cytoscape.$(`node[id = "${this.state.detailNode}"]`).data()}
+
                         initialMode={this.state.sidebarMode}
                         onEdit={this.editNode}
+                        onChangeColor={this.changeColor}
                         onClose={this.closeSidebar}
                     />
                 }
